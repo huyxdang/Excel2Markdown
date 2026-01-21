@@ -1,7 +1,5 @@
 # Excel-to-LLM Pipeline
 
-## Overview
-
 This system converts Excel workbooks into structured CSV files optimized for large language models. It solves the problem of extracting tabular and text data from complex, multi-sheet Excel files in a deterministic, inspectable format. 
 
 ## High-Level Workflow
