@@ -116,13 +116,11 @@ A2: Design Phase,B2: Alice,C2: 2026-02-15
 
 ## 🛠️ Testing and Performance
 
-Run benchmarks to measure conversion speed and output quality:
+Run test to measure conversion speed and output quality:
 
 ```bash
 python measure.py BRD_input.xlsx output.csv
 ```
-
-Benchmarks are stored in the `benchmark/` directory for tracking performance over time.
 
 
 ## 🌠 Images Handling
