@@ -25,11 +25,7 @@ import os
 from typing import List
 
 # Try importing from either filename
-try:
-    from brd_converter_final import excel_to_csv
-except ImportError:
-    from brd_converter import excel_to_csv
-
+from brd_converter import excel_to_csv
 
 def get_all_sheet_names(excel_path: str) -> List[str]:
     """

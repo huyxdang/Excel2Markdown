@@ -35,4 +35,5 @@ if __name__ == "__main__":
         sys.exit(1)
     
     excel_file = sys.argv[1]
+    print("Number of sheets:", len(load_workbook(excel_file).sheetnames))
     list_sheets(excel_file)
