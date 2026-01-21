@@ -2,7 +2,7 @@
 
 This system converts Excel workbooks into structured CSV files optimized for large language models. It solves the problem of extracting tabular and text data from complex, multi-sheet Excel files in a deterministic, inspectable format. 
 
-## High-Level Workflow
+## 🏗️ High-Level Workflow
 
 1. **Excel File** → Input workbook with multiple sheets, tables, text, and images.
 2. **Converter** → `excel_converter.py` scans all sheets and cells, extracts values row-major, saves images separately.
@@ -13,7 +13,7 @@ This system converts Excel workbooks into structured CSV files optimized for lar
 5. **Markdown Output** → The LLM generates Markdown formatted for documentation systems.
 6. **Rendering** → Paste the Markdown into a renderer (Markdown Live Preview, Confluence, etc.) for final output.
 
-## Inputs and Outputs
+## 💭 Inputs and Outputs
 
 ### Input
 
@@ -31,7 +31,7 @@ Why CSV? It's:
 - Human-readable (easy to inspect and debug)
 - Efficient for LLM processing (lower token cost, clearer structure)
 
-## How to Run
+## ⁉️ How to Run
 
 ### Prerequisites
 
@@ -83,7 +83,7 @@ python excel_converter.py BRD_input.xlsx --list
 python excel_converter.py BRD_input.xlsx output.csv --sheets "5.1.1a" "5.1.2b" "Status"
 ```
 
-## CSV Structure
+## 📁 CSV Structure
 
 The CSV file is organized by sheet, with cell coordinates and values listed row-major (left-to-right, top-to-bottom).
 
@@ -114,7 +114,7 @@ A2: Design Phase,B2: Alice,C2: 2026-02-15
 - Image references use Markdown syntax: `![image](images/<filename>.png)`
 
 
-## Testing and Performance
+## 🛠️ Testing and Performance
 
 Run benchmarks to measure conversion speed and output quality:
 
@@ -125,7 +125,7 @@ python measure.py BRD_input.xlsx output.csv
 Benchmarks are stored in the `benchmark/` directory for tracking performance over time.
 
 
-## Images Handling
+## 🌠 Images Handling
 
 **Hard Requirement:** Images are not embedded in the CSV. Instead:
 
