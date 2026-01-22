@@ -64,6 +64,36 @@ Please output:
 Provide your analysis in natural language markdown format (NOT JSON). Be concise but comprehensive."""
 
 
+def load_csv_content(csv_path: str, max_rows: int = 500) -> tuple[str, int]:
+    """
+    Load CSV content as text, limited to max_rows.
+    
+    Returns:
+        (content_text, total_row_count)
+    """
+    rows = []
+    total_rows = 0
+    
+    try:
+        with open(csv_path, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            for i, row in enumerate(reader):
+                total_rows += 1
+                if i < max_rows:
+                    rows.append(','.join(row))
+                    
+        content = '\n'.join(rows)
+        
+        if total_rows > max_rows:
+            content += f"\n\n... ({total_rows - max_rows} more rows truncated)"
+            
+        return content, total_rows
+        
+    except Exception as e:
+        print(f"Error reading {csv_path}: {e}")
+        return "", 0
+
+
 def summarize_sheet(client: Anthropic, sheet_name: str, csv_path: str, max_tokens: int = 2000) -> str:
     """
     Use Claude API to summarize a single sheet.
@@ -111,36 +141,6 @@ def get_sheet_name_from_filename(filename: str) -> str:
         'Status.csv' -> 'Status'
     """
     return os.path.splitext(os.path.basename(filename))[0]
-
-
-def load_csv_content(csv_path: str, max_rows: int = 500) -> tuple[str, int]:
-    """
-    Load CSV content as text, limited to max_rows.
-
-    Returns:
-        (content_text, total_row_count)
-    """
-    rows = []
-    total_rows = 0
-
-    try:
-        with open(csv_path, 'r', encoding='utf-8') as f:
-            reader = csv.reader(f)
-            for i, row in enumerate(reader):
-                total_rows += 1
-                if i < max_rows:
-                    rows.append(','.join(row))
-
-        content = '\n'.join(rows)
-
-        if total_rows > max_rows:
-            content += f"\n\n... ({total_rows - max_rows} more rows truncated)"
-
-        return content, total_rows
-
-    except Exception as e:
-        print(f"Error reading {csv_path}: {e}")
-        return "", 0
 
 
 def summarize_all_sheets(sheets_dir: str, output_dir: str, api_key: str = None) -> dict:
