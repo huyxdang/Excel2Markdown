@@ -92,6 +92,8 @@ def load_csv_content(csv_path: str, max_rows: int = 500) -> tuple[str, int]:
     except Exception as e:
         print(f"Error reading {csv_path}: {e}")
         return "", 0
+    
+# THIS IS ================WRONG================
 
 
 def summarize_sheet(client: Anthropic, sheet_name: str, csv_path: str, max_tokens: int = 2000) -> str:
