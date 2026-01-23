@@ -1,0 +1,5 @@
+- [ ] Add Images 
+- [ ] Need a way to measure the accuracy of information
+- [ ] Store + Render Images 
+- [ ] Main.py to orchestrate everything in one-go
+- [X] Thêm số để number sections (readability)
