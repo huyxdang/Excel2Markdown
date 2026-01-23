@@ -29,4 +29,7 @@ ANTHROPIC_API_KEY = "your_key_here"
 Running the workflow 
 ```
 python main.py <excel_file.xlsx> --output-dir <output_path>
+
+# Example
+python mian.py data/BRD_input.xlsx --output-dir output
 ```
