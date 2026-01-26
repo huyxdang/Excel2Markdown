@@ -1,43 +1,89 @@
-# Phân tích Sheet Status
+# Phân tích Sheet: Status
 
 ## 1. Loại sheet
-**quy-trình** - Sheet này mô tả chi tiết các quy trình nghiệp vụ và workflow của hệ thống quản lý tài sản.
+**quy-trình**
 
-## 2. Chủ đề/tiêu đề chính
-**Định nghĩa trạng thái và quy trình quản lý tài sản** - Sheet này định nghĩa các trạng thái, quy trình và workflow cho các hoạt động quản lý tài sản bao gồm cấp phát, thanh lý và điều chuyển tài sản.
+## 2. Mức độ chi tiết
+**chi-tiết-cao**
 
-## 3. Tóm tắt thông tin chính
+## 3. Chủ đề/tiêu đề chính
+Định nghĩa các trạng thái (status) và luồng chuyển đổi trạng thái trong hệ thống quản lý tài sản, bao gồm các quy trình cấp tài sản, thanh lý và điều chuyển.
 
-Sheet này mô tả ba quy trình nghiệp vụ chính trong hệ thống quản lý tài sản với các workflow phức tạp và nhiều bước phê duyệt. Mỗi quy trình được thiết kế với cơ chế kiểm soát chặt chẽ thông qua nhiều cấp phê duyệt và vai trò khác nhau.
+## 4. Tóm tắt thông tin chính
 
-**Quy trình cấp tài sản** được chia thành hai luồng: cấp tài sản không ở kho (3 bước đơn giản) và cấp tài sản từ kho (6 bước phức tạp hơn). Luồng từ kho yêu cầu nhiều bước phê duyệt từ AM, WK, Warehouse Manager và cuối cùng là xác nhận từ người dùng cuối.
+Sheet này mô tả chi tiết các trạng thái và workflow của ba quy trình chính trong hệ thống quản lý tài sản. Đầu tiên là quy trình **cấp tài sản**, bao gồm hai luồng: cấp tài sản không ở kho (workflow đơn giản với 3 bước) và cấp tài sản từ kho (workflow phức tạp hơn với 6 bước từ tạo yêu cầu đến nhận hàng).
 
-**Quy trình thanh lý tài sản** có hai phương thức: bán trực tiếp (8 bước) và bán đấu giá (10 bước). Cả hai đều yêu cầu kiểm soát từ Checker, phê duyệt từ Approver, và đặc biệt quy trình đấu giá còn có thêm bước kiểm soát và phê duyệt kết quả thanh lý riêng biệt. **Quy trình điều chuyển** bao gồm điều chuyển về kho (6 bước) và điều chuyển giữa các kho (5 bước), với sự tham gia của BU Head, AMP, và Warehouse Manager.
+Thứ hai là quy trình **thanh lý tài sản** với hai phương thức: bán trực tiếp (8 bước) và bán đấu giá (10 bước). Cả hai phương thức đều có các giai đoạn kiểm soát, phê duyệt, cập nhật kết quả và xuất kho tài sản. Quy trình bán đấu giá có thêm bước kiểm soát kết quả thanh lý trước khi phê duyệt cuối cùng.
 
-## 4. Các bên liên quan/vai trò được đề cập
+Cuối cùng là quy trình **điều chuyển tài sản**, bao gồm điều chuyển về kho (6 bước) và điều chuyển giữa các kho (5 bước). Mỗi quy trình đều có các checkpoint phê duyệt và xác nhận từ các bên liên quan.
 
-- **AMP** (Asset Management Personnel) - Nhân viên quản lý tài sản
-- **BU User** - Người dùng đơn vị kinh doanh  
-- **BU Head** - Trưởng đơn vị kinh doanh
-- **AM** (Asset Manager) - Quản lý tài sản
-- **WK** (Warehouse Keeper) - Thủ kho
-- **Warehouse Manager** - Quản lý kho
-- **Checker** - Nhân viên kiểm soát
-- **Approver** - Người phê duyệt
-- **System** - Hệ thống tự động
+## 5. Các bên liên quan/vai trò được đề cập
 
-## 5. Các yêu cầu tìm thấy
+- **AMP**: Asset Management Personnel - Nhân viên quản lý tài sản
+- **BU User**: Business Unit User - Người dùng đơn vị kinh doanh  
+- **BU Head**: Business Unit Head - Trưởng đơn vị kinh doanh
+- **AM**: Asset Manager - Quản lý tài sản
+- **WK**: Warehouse Keeper - Thủ kho
+- **Warehouse Mgr.**: Warehouse Manager - Quản lý kho
+- **Checker**: Người kiểm soát
+- **Approver**: Người phê duyệt
+- **System**: Hệ thống tự động
 
-- **Yêu cầu phân quyền**: Mỗi vai trò có quyền hạn và trách nhiệm cụ thể trong từng bước của quy trình
-- **Yêu cầu workflow**: Các trạng thái phải tuân theo thứ tự logic, không thể bỏ qua bước nào
-- **Yêu cầu kiểm soát**: Tất cả quy trình thanh lý đều phải qua kiểm soát và phê duyệt nhiều cấp
-- **Yêu cầu tự động hóa**: Hệ thống tự động tạo yêu cầu xuất kho và nhập kho ở một số bước nhất định
-- **Yêu cầu rollback**: Có cơ chế "Trả lại trạng thái ban đầu trước khi thanh lý" khi hủy yêu cầu
-- **Yêu cầu bổ sung thông tin**: Cho phép yêu cầu bổ sung thông tin và quay lại bước trước đó trong workflow
+## 6. Các yêu cầu tìm thấy
 
-## 6. Các sheet liên quan
+- Hệ thống phải hỗ trợ workflow đa cấp với các trạng thái chuyển đổi rõ ràng
+- Mỗi hành động phải có người thực hiện (PIC) được xác định
+- Hệ thống cần tự động tạo yêu cầu xuất/nhập kho khi cần thiết
+- Phải có cơ chế từ chối, bổ sung thông tin và rollback trạng thái
+- Trạng thái tài sản phải được cập nhật song song với trạng thái yêu cầu
+- Hệ thống cần theo dõi được lịch sử thay đổi trạng thái
 
-Sheet này có liên kết với sheet khác thông qua ký hiệu `[<<<](→0)` ở ô A1, cho thấy có tham chiếu đến sheet hoặc tài liệu khác trong hệ thống BRD. Tuy nhiên, không có thông tin chi tiết cụ thể về các sheet liên quan khác được đề cập rõ ràng trong nội dung.
+## 7. Các sheet liên quan
+
+Không có tham chiếu trực tiếp đến sheet khác, nhưng có liên quan đến:
+- Sheet định nghĩa vai trò và quyền hạn của các PIC
+- Sheet mô tả chi tiết các quy trình nghiệp vụ
+- Sheet định nghĩa cấu trúc dữ liệu tài sản
+
+## 8. Bảng cần giữ nguyên
+
+### Bảng State Transitions - Cấp tài sản không ở kho
+
+| Sub-process | PIC | Action | Request Status | Asset Status | Note |
+|-------------|-----|--------|----------------|--------------|------|
+| 1 Tạo yêu cầu | AMP | Lưu | Đang tạo | - | - |
+| | | Gửi | Chờ xác nhận | - | - |
+| 2. Xác nhận | BU User | Từ chối | Từ chối | - | - |
+| | | Xác nhận | Đã xác nhận | Đang sử dụng | Đã xác nhận >>> Đã nhận tài sản |
+| | | Bổ sung thông tin | Bổ sung thông tin | - | - |
+| 3. Bổ sung TT | AMP | Bổ sung thông tin | Chờ xác nhận | - | - |
+
+### Bảng State Transitions - Cấp tài sản từ kho
+
+| Sub-process | PIC | Action | Request Status | Warehouse Status | Asset Status |
+|-------------|-----|--------|----------------|------------------|--------------|
+| 1. Tạo yêu cầu | AMP | Lưu | Đang tạo | - | - |
+| | | Gửi | Chờ xác nhận | - | - |
+| 2. Phê duyệt | AM | Từ chối | Từ chối | - | - |
+| | | Duyệt | Đã xác nhận | - | - |
+| 3. Tạo yêu cầu | System | - | Đã xác nhận | Chờ xuất kho | - |
+| 4. Xuất kho | WK | Từ chối | Từ chối | Từ chối | - |
+| | | Đồng ý | Đã xác nhận | Chờ phê duyệt | - |
+| 5. Phê duyệt | Warehouse Mgr. | Từ chối | Từ chối | Từ chối | - |
+| | | Duyệt | Đã xác nhận | Chờ xác nhận | - |
+| 6. Nhận hàng | BU User | Từ chối | Từ chối | Từ chối | - |
+| | | Xác nhận | Đã xác nhận | Đã nhận tài sản | Đang sử dụng |
+
+### Bảng State Transitions - Thanh lý tài sản (Bán trực tiếp)
+
+| Sub-process | PIC | Action | Request Status | Warehouse Status | Asset Status | Note |
+|-------------|-----|--------|----------------|------------------|--------------|------|
+| 1. Tạo yêu cầu | AMP | Lưu | Đang tạo | - | - | - |
+| | | Gửi | Chờ kiểm soát | - | - | - |
+| 2. Kiểm soát | Checker | Từ chối | Từ chối | - | - | - |
+| | | Yêu cầu bổ sung thông tin | Bổ sung thông tin | - | - | - |
+| | | Đồng ý | Chờ phê duyệt | - | - | - |
+| 3. Phê duyệt | Approver | Từ chối |
 
 ---
 *Source: Status.csv | Rows: 87 | Generated by Claude Sonnet 4.5*
