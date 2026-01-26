@@ -1,3 +1,1 @@
-- [X] Add Images 
-- [ ] Accuracy Measurement
-- [X] Store + Render Images 
+- [X] Fix Tables 
