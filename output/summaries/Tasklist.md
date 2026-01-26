@@ -1,69 +1,70 @@
 # Phân tích Sheet: Tasklist
 
 ## 1. Loại sheet
-**quy-trình** - Sheet mô tả các task và workflow trong quy trình điều chuyển kho
+**quy-trình**
 
 ## 2. Mức độ chi tiết
-**chi-tiết-cao** - Sheet chứa ma trận phân quyền chi tiết với mapping cụ thể giữa các vai trò và trạng thái xử lý task
+**chi-tiết-cao** - Sheet chứa thông tin chi tiết về phân bổ công việc, vai trò cụ thể và trạng thái xử lý theo từng hành động trong quy trình.
 
 ## 3. Chủ đề/tiêu đề chính
-**Ma trận phân công task và trạng thái xử lý trong quy trình điều chuyển kho** - Định nghĩa ai làm gì, khi nào và task xuất hiện ở tasklist nào
+**Ma trận phân công công việc (Tasklist) cho quy trình điều chuyển và quản lý kho** - Xác định ai làm gì, khi nào và ở trạng thái nào trong quy trình xử lý yêu cầu điều chuyển và nhập kho.
 
 ## 4. Tóm tắt thông tin chính
 
-Sheet này định nghĩa một ma trận phân quyền chi tiết cho quy trình điều chuyển kho, bao gồm 3 sub-process chính: tạo yêu cầu điều chuyển (2.3.1a), phê duyệt yêu cầu (2.3.3a), và xác nhận yêu cầu điều chuyển kèm nhập kho (5.2.2a). Mỗi sub-process có nhiều action khác nhau như lưu, gửi, từ chối, duyệt, bổ sung thông tin và xác nhận.
+Sheet này mô tả chi tiết phân công công việc cho quy trình điều chuyển tài sản/hàng hóa từ khâu tạo yêu cầu đến nhập kho cuối cùng. Quy trình được chia thành hai luồng chính: "Tasklist Điều chuyển" và "Tasklist Kho", mỗi luồng có trạng thái "Cần xử lý" và "Đã xử lý" tương ứng.
 
-Hệ thống có hai loại tasklist chính là "Tasklist Điều chuyển" và "Tasklist Kho", mỗi tasklist được chia thành trạng thái "Cần xử lý" và "Đã xử lý". Sheet cho thấy luồng xử lý từ khâu tạo yêu cầu ban đầu, qua các bước phê duyệt đa cấp, đến khâu xác nhận cuối cùng và nhập kho.
+Quy trình bao gồm 3 sub-process chính: tạo yêu cầu điều chuyển (2.3.1a), phê duyệt yêu cầu (2.3.3a), và xác nhận yêu cầu điều chuyển (5.2.2a). Mỗi bước có nhiều hành động như Lưu, Gửi, Từ chối, Duyệt, Bổ sung thông tin, và Xác nhận, được phân công cho các vai trò khác nhau.
 
-Đặc biệt, sheet ghi nhận một vấn đề về quy trình xử lý tại bước phê duyệt yêu cầu nhập kho, cho thấy có gap cần được giải quyết trong thiết kế hệ thống.
+Đặc biệt, sheet ghi nhận một vấn đề về quy trình xử lý ở bước "Phê duyệt yêu cầu nhập kho", cho thấy cần có sự điều chỉnh hoặc làm rõ thêm trong quy trình này.
 
 ## 5. Các bên liên quan/vai trò được đề cập
+
 - **Initiator**: Người khởi tạo yêu cầu
-- **BUH**: Business Unit Head - Trưởng phòng/đơn vị kinh doanh  
-- **AMP**: Asset Management Personnel - Nhân viên quản lý tài sản
-- **WM**: Warehouse Manager - Quản lý kho
+- **BUH** (Business Unit Head): Trưởng đơn vị kinh doanh  
+- **AMP**: Vai trò quản lý tài sản (Asset Management Personnel)
+- **WM** (Warehouse Manager): Quản lý kho
 
 ## 6. Các yêu cầu tìm thấy
-- Hệ thống cần có hai loại tasklist riêng biệt cho điều chuyển và kho
-- Mỗi tasklist cần phân biệt trạng thái "Cần xử lý" và "Đã xử lý"
-- Cần xử lý quy trình phê duyệt đa cấp với các vai trò khác nhau
-- Yêu cầu giải quyết vấn đề quy trình tại bước phê duyệt nhập kho
-- Hệ thống cần hỗ trợ các action: lưu, gửi, từ chối, duyệt, bổ sung thông tin, xác nhận
+
+- Yêu cầu phân định rõ ràng trách nhiệm xử lý công việc theo từng vai trò
+- Yêu cầu theo dõi trạng thái "Cần xử lý" và "Đã xử lý" cho cả hai luồng Điều chuyển và Kho
+- Yêu cầu có quy trình phê duyệt đa cấp với sự tham gia của Initiator, BUH và AMP
+- Yêu cầu xử lý các tình huống từ chối, bổ sung thông tin trong quy trình
+- Yêu cầu giải quyết vấn đề quy trình ở bước "Phê duyệt yêu cầu nhập kho"
 
 ## 7. Các sheet liên quan
-- Sub-process 2.3.1a: Tạo yêu cầu điều chuyển
-- Sub-process 2.3.3a: Phê duyệt yêu cầu điều chuyển  
-- Sub-process 5.2.2a: Xác nhận yêu cầu điều chuyển
+
+- Sheet mô tả chi tiết sub-process **2.3.1a** (Tạo yêu cầu điều chuyển)
+- Sheet mô tả chi tiết sub-process **2.3.3a** (Phê duyệt yêu cầu điều chuyển)  
+- Sheet mô tả chi tiết sub-process **5.2.2a** (Xác nhận yêu cầu điều chuyển)
 
 ## 8. Bảng cần giữ nguyên
 
-### Ma trận Task và Vai trò
-
-| Sub-process | Action | Role | Tasklist Điều chuyển - Cần xử lý | Tasklist Điều chuyển - Đã xử lý | Tasklist Kho - Cần xử lý | Tasklist Kho - Đã xử lý | Ghi chú |
-|------------|---------|------|:-------------------------------:|:------------------------------:|:------------------------:|:-----------------------:|---------|
-| 2.3.1a Tạo yêu cầu điều chuyển | Lưu | Initiator | x | | | | |
-| | Gửi | | | x | | | |
-| 2.3.3a Phê duyệt yêu cầu điều chuyển | Từ chối | Initiator | x | | | | |
-| | | BUH | | x | | | |
-| | Duyệt | Initiator | | x | | | |
-| | | BUH | | x | | | |
-| | | AMP | x | | | | |
-| | Bổ sung thông tin | Initiator | x | | | | |
-| | | BUH | | x | | | |
-| 5.2.2a Xác nhận yêu cầu điều chuyển | Từ chối | Initiator | x | | | | |
-| | | BUH | | x | | | |
-| | | AMP | | x | | | |
-| | Bổ sung thông tin | Initiator | x | | | | |
-| | | BUH | | x | | | |
-| | | AMP | | x | | | |
-| | Xác nhận & Yêu cầu nhập kho | Initiator | x | | | | |
-| | | BUH | | x | | | |
-| | | AMP | | x | x | | |
-| | | WM | | | x | | |
-| | Phê duyệt yêu cầu nhập kho - Từ chối | Initiator | x | | x | | Vấn đề về quy trình xử lý |
-| | Phê duyệt yêu cầu nhập kho - Duyệt | | | | | | |
-| | Xác nhận nhập kho - Từ chối | | | | | | |
-| | Xác nhận nhập kho - Xác nhận | | | | | | |
+| Sub-process | Hành động | Chi tiết | Vai trò | Điều chuyển - Cần xử lý | Điều chuyển - Đã xử lý | Kho - Cần xử lý | Kho - Đã xử lý | Ghi chú |
+|-------------|-----------|----------|---------|-------------------------|------------------------|-----------------|----------------|---------|
+| 2.3.1a Tạo yêu cầu điều chuyển | Lưu | | Initiator | x | | | | |
+| | Gửi | | | | x | | | |
+| 2.3.3a Phê duyệt yêu cầu điều chuyển | Từ chối | | Initiator | x | | | | |
+| | | | BUH | | x | | | |
+| | Duyệt | | Initiator | | x | | | |
+| | | | BUH | | x | | | |
+| | | | AMP | x | | | | |
+| | Bổ sung thông tin | | Initiator | x | | | | |
+| | | | BUH | | x | | | |
+| 5.2.2a Xác nhận yêu cầu điều chuyển | Từ chối | | Initiator | x | | | | |
+| | | | BUH | | x | | | |
+| | | | AMP | | x | | | |
+| | Bổ sung thông tin | | Initiator | x | | | | |
+| | | | BUH | | x | | | |
+| | | | AMP | | x | | | |
+| | Xác nhận & Yêu cầu nhập kho | Gửi | Initiator | x | | | | |
+| | | | BUH | | x | | | |
+| | | | AMP | | x | x | | |
+| | | | WM | | | x | | |
+| | Phê duyệt yêu cầu nhập kho | Từ chối | Initiator | x | | x | | Vấn đề về quy trình xử lý |
+| | | Duyệt | | | | | | |
+| | Xác nhận nhập kho | Từ chối | | | | | | |
+| | | Xác nhận | | | | | | |
 
 ---
 *Source: Tasklist.csv | Rows: 35 | Generated by Claude Sonnet 4.5*

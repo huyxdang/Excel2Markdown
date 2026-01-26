@@ -1,150 +1,122 @@
-# Tài Liệu Yêu Cầu Nghiệp Vụ (BRD) - FAM Upgrade Wave 4
+# Tài liệu Yêu cầu Nghiệp vụ - FAM Wave 4
 
 ## Mục lục
 
-- [1. Executive Summary](#1-executive-summary)
-- [2. Project Scope & Objectives](#2-project-scope-objectives)
-- [3. Stakeholders](#3-stakeholders)
-- [4. Business Requirements](#4-business-requirements)
-  - [4.1. Asset Dashboard Module](#41-asset-dashboard-module)
-  - [4.2. Warehouse Management Module](#42-warehouse-management-module)
-    - [4.2.1. Create Warehouse Intake Request](#421-create-warehouse-intake-request)
-    - [4.2.2. Approve Warehouse Entry Request](#422-approve-warehouse-entry-request)
-    - [4.2.3. Warehouse Receipt Confirmation](#423-warehouse-receipt-confirmation)
-    - [4.2.4. Manual Warehouse Entry](#424-manual-warehouse-entry)
-    - [4.2.5. Cancel Warehouse Request](#425-cancel-warehouse-request)
-    - [4.2.6. Asset Allocation and Warehouse Exit](#426-asset-allocation-and-warehouse-exit)
-    - [4.2.7. Cancel Warehouse Exit Request](#427-cancel-warehouse-exit-request)
-    - [4.2.8. Inter-Warehouse Transfer](#428-inter-warehouse-transfer)
-  - [4.3. Asset Enhancement Features](#43-asset-enhancement-features)
-- [5. Business Process Flows](#5-business-process-flows)
-- [6. System Status Management](#6-system-status-management)
-- [7. Task Assignment Matrix](#7-task-assignment-matrix)
-- [8. Assumptions & Constraints](#8-assumptions-constraints)
-- [9. Dependencies](#9-dependencies)
-- [10. Acceptance Criteria](#10-acceptance-criteria)
-- [11. Glossary](#11-glossary)
+1. [Executive Summary](#1-executive-summary)
+2. [Project Scope & Objectives](#2-project-scope-objectives)
+3. [Stakeholders](#3-stakeholders)
+4. [Business Requirements](#4-business-requirements)
+   - 4.1. [Asset Dashboard Module](#41-asset-dashboard-module)
+   - 4.2. [Warehouse Management Module](#42-warehouse-management-module)
+     - 4.2.1. [Create Warehouse Intake Request](#421-create-warehouse-intake-request)
+     - 4.2.2. [Approve Warehouse Intake Request](#422-approve-warehouse-intake-request)
+     - 4.2.3. [Warehouse Intake Confirmation](#423-warehouse-intake-confirmation)
+     - 4.2.4. [Manual Warehouse Intake Process](#424-manual-warehouse-intake-process)
+     - 4.2.5. [Cancel Warehouse Intake Request](#425-cancel-warehouse-intake-request)
+   - 4.3. [Asset Provisioning Module](#43-asset-provisioning-module)
+   - 4.4. [Inter-Warehouse Transfer Module](#44-inter-warehouse-transfer-module)
+     - 4.4.1. [Create Inter-Warehouse Transfer Request](#441-create-inter-warehouse-transfer-request)
+     - 4.4.2. [Approve Inter-Warehouse Transfer Request](#442-approve-inter-warehouse-transfer-request)
+   - 4.5. [Warehouse Export Module](#45-warehouse-export-module)
+5. [System Integration Requirements](#5-system-integration-requirements)
+6. [Workflow & Status Management](#6-workflow-status-management)
+7. [Assumptions & Constraints](#7-assumptions-constraints)
+8. [Dependencies](#8-dependencies)
+9. [Acceptance Criteria](#9-acceptance-criteria)
 
 ---
 
 ## 1. Executive Summary
 
-Dự án nâng cấp hệ thống quản lý tài sản FAM (Fixed Asset Management) giai đoạn Wave 4 tập trung vào việc phát triển và cải tiến các tính năng cốt lõi nhằm tối ưu hóa quy trình quản lý tài sản doanh nghiệp.
+Dự án FAM Wave 4 là một chương trình nâng cấp toàn diện hệ thống quản lý tài sản cố định (Fixed Asset Management) nhằm cải thiện hiệu quả quản lý và tự động hóa quy trình nghiệp vụ. Dự án tập trung vào việc phát triển các module chức năng mới và nâng cấp các tính năng hiện có để đáp ứng nhu cầu quản lý tài sản ngày càng phức tạp của tổ chức.
 
-Các sản phẩm chính bao gồm [4.1. module dashboard tài sản](#41-asset-dashboard-module) với khả năng visualization và customization, [4.2. module quản lý kho toàn diện](#42-warehouse-management-module) xử lý xuất-nhập kho tài sản, và [4.3. các tính năng cải tiến](#43-asset-enhancement-features) cho hệ thống hiện tại.
+Các sản phẩm chính bao gồm [module dashboard tài sản tương tác](#41-asset-dashboard-module) với khả năng trực quan hóa dữ liệu, [module quản lý kho toàn diện](#42-warehouse-management-module) hỗ trợ đầy đủ quy trình xuất nhập kho, và [module điều chuyển tài sản giữa các kho](#44-inter-warehouse-transfer-module). Hệ thống cũng được tích hợp với các hệ thống hiện có như OMS và EMS để đảm bảo đồng bộ dữ liệu và tối ưu hóa quy trình nghiệp vụ.
 
-Dự án bao gồm 11 yêu cầu chính được phân loại thành ba nhóm: Enhancement (cải tiến), New Launch (module mới), và Integration (tích hợp hệ thống). Trong đó, [module kho](#42-warehouse-management-module) được đánh giá mức ưu tiên cao nhất với khả năng xử lý các quy trình xuất-nhập kho phức tạp và tích hợp với các module khác trong hệ thống.
-
----
+Dự án được thiết kế với workflow phê duyệt nhiều cấp, hỗ trợ tự động hóa các quy trình lặp lại và cung cấp khả năng theo dõi, kiểm soát chặt chẽ tất cả các hoạt động liên quan đến tài sản.
 
 ## 2. Project Scope & Objectives
 
 ### Trong phạm vi dự án
 
-- Phát triển dashboard tài sản với khả năng trực quan hóa dữ liệu và tùy chỉnh theo nhiều tiêu chí
-- Xây dựng module quản lý kho hoàn chỉnh với các chức năng xuất-nhập kho tự động và thủ công
-- Cải tiến các tính năng hiện có của hệ thống quản lý tài sản
-- Tích hợp với các hệ thống OMS và EMS để đồng bộ dữ liệu
-- Phát triển module sửa chữa tài sản tích hợp với ITSM
+- Phát triển [dashboard tài sản](#41-asset-dashboard-module) với khả năng trực quan hóa và tùy biến theo nhiều tiêu chí
+- Xây dựng [module quản lý kho](#42-warehouse-management-module) hoàn chỉnh hỗ trợ các quy trình xuất nhập kho tự động và thủ công
+- Triển khai [module cấp tài sản](#43-asset-provisioning-module) với quy trình phê duyệt tối ưu
+- Phát triển [module điều chuyển tài sản](#44-inter-warehouse-transfer-module) giữa các kho
+- Tích hợp với hệ thống OMS để đồng bộ orgchart và thông tin kho
+- Tích hợp với hệ thống EMS để đồng bộ thông tin PO và thời gian đưa vào sử dụng
+- Cải tiến các tính năng hiện có: ẩn/hiện tài sản vô hiệu hóa, tùy chỉnh hiển thị cột danh sách
 
 ### Ngoài phạm vi dự án
 
-- Thay đổi cấu trúc cơ sở dữ liệu hiện tại
-- Phát triển các module không được liệt kê trong yêu cầu
-- Tích hợp với các hệ thống bên ngoài khác OMS và EMS
+- Module sửa chữa tài sản (được đánh dấu ưu tiên thấp - mức 4)
+- Phần mềm quản lý tài liệu số
+- Tích hợp với các hệ thống bên ngoài khác ngoài OMS và EMS
 
 ### Mục tiêu dự án
 
-- Nâng cao hiệu quả quản lý tài sản thông qua tự động hóa quy trình
-- Cải thiện khả năng theo dõi và báo cáo tình trạng tài sản
-- Tối ưu hóa quy trình xuất-nhập kho và điều chuyển tài sản
-- Đảm bảo tính nhất quán dữ liệu giữa các hệ thống
-
----
+- Cải thiện khả năng trực quan hóa và phân tích dữ liệu tài sản
+- Tự động hóa tối đa các quy trình quản lý kho và cấp phát tài sản
+- Giảm thiểu thời gian xử lý và sai sót trong quy trình nghiệp vụ
+- Tăng cường khả năng theo dõi và kiểm soát tài sản trong toàn tổ chức
+- Đảm bảo tính nhất quán dữ liệu thông qua tích hợp hệ thống
 
 ## 3. Stakeholders
 
-### Vai trò trong hệ thống
+Dự án FAM Wave 4 có sự tham gia của nhiều bên liên quan với vai trò và trách nhiệm khác nhau:
 
-- **AMP (Asset Management Personnel)** - Nhân viên quản lý tài sản: Thực hiện các tác vụ quản lý tài sản hàng ngày
-- **AM (Asset Manager)** - Quản lý tài sản: Phê duyệt các yêu cầu cấp phát và thanh lý tài sản
-- **BU User (Business Unit User)** - Người dùng đơn vị kinh doanh: Tạo yêu cầu và nhận tài sản
-- **BU Head (Business Unit Head)** - Trưởng đơn vị kinh doanh: Phê duyệt yêu cầu từ đơn vị
-- **WK (Warehouse Keeper)** - Thủ kho: Thực hiện các tác vụ xuất-nhập kho
-- **Warehouse Manager** - Quản lý kho: Phê duyệt các yêu cầu liên quan đến kho
-- **Checker** - Người kiểm soát: Kiểm tra các yêu cầu trước khi phê duyệt
-- **Approver** - Người phê duyệt: Phê duyệt cuối cùng các yêu cầu quan trọng
+### Nhóm quản lý tài sản
+- **Asset Manager (AM)**: Phê duyệt các yêu cầu cấp tài sản và điều chuyển cấp cao
+- **Asset Management Personnel (AMP)**: Thực hiện các nghiệp vụ quản lý tài sản hàng ngày, tạo và xử lý các yêu cầu
 
-### Hệ thống liên quan
+### Nhóm quản lý kho
+- **Warehouse Manager (WM)**: Phê duyệt các yêu cầu xuất nhập kho, quản lý hoạt động kho tổng thể
+- **Warehouse Keeper (WK)**: Thực hiện các hoạt động xuất nhập kho thực tế, xác nhận giao nhận hàng hóa
 
-- **OMS (Organization Management System)** - Hệ thống quản lý tổ chức
-- **EMS (Employee Management System)** - Hệ thống quản lý nhân sự  
-- **ITSM (IT Service Management)** - Hệ thống quản lý dịch vụ IT
-- **Cổng hỗ trợ chi nhánh** - Trên intranet
+### Nhóm nghiệp vụ
+- **Business Unit Manager (BU Mgr)**: Phê duyệt các yêu cầu từ đơn vị, quản lý tài sản của phòng ban
+- **Business Unit User (BU User)**: Người dùng cuối, tạo yêu cầu và nhận tài sản
 
----
+### Hệ thống tích hợp
+- **OMS (Organization Management System)**: Cung cấp dữ liệu tổ chức, thông tin kho và nhân sự
+- **EMS**: Đồng bộ thông tin PO và thời gian phê duyệt
+- **ITSM**: Hệ thống quản lý sự cố IT (cho module sửa chữa tương lai)
 
 ## 4. Business Requirements
 
 ### 4.1. Asset Dashboard Module
 
-Module dashboard tài sản cung cấp giao diện tổng quan trực quan hóa dữ liệu tài sản của tổ chức, hỗ trợ việc đưa ra quyết định nhanh chóng về quản lý tài sản. Dashboard hiển thị các thông số tổng quan như tổng số tài sản, tổng giá trị, tỷ lệ tài sản còn bảo hành và tỷ lệ sử dụng tài sản.
+Module dashboard tài sản được thiết kế để cung cấp giao diện tổng quan và trực quan hóa dữ liệu tài sản, hỗ trợ việc đưa ra quyết định nhanh chóng và hiệu quả. Dashboard hiển thị dữ liệu tài sản theo nhiều góc độ khác nhau bao gồm phòng ban, trạng thái tài sản, biến động theo thời gian và tỷ lệ sử dụng.
 
-![Dashboard tài sản](images/1.csv)
+Hệ thống cung cấp bốn thông số tổng quan chính: tổng số lượng tài sản, tổng giá trị tài sản, tỷ lệ tài sản còn bảo hành và tỷ lệ sử dụng. Tất cả các tính toán sẽ loại trừ tài sản đã thanh lý và vô hiệu hóa để đảm bảo tính chính xác của báo cáo.
 
-Hệ thống cung cấp nhiều dạng biểu đồ tương tác (Sunburst, Stacked Column, Line, Scatter) để hiển thị phân bổ tài sản, giá trị theo nhóm, biến động theo thời gian và phân tích theo thời gian sử dụng. Dashboard có khả năng lọc dữ liệu theo nhiều tiêu chí và hỗ trợ xuất báo cáo ra Excel.
+Dashboard được trang bị năm loại bộ lọc chính: theo vùng, đơn vị sử dụng (đồng bộ từ OMS), phân nhóm tài sản (CAT 1 và Group name), trạng thái tài sản (không bao gồm đã thanh lý và vô hiệu hóa), và thời gian. Hệ thống hỗ trợ xuất dữ liệu dashboard ra file Excel để phục vụ báo cáo và phân tích chi tiết.
 
-**Yêu cầu chức năng:**
-- Giao diện phải trực quan và hỗ trợ đưa ra quyết định nhanh chóng
-- Biểu đồ có tính tương tác với khả năng click chuyển sang module liên quan
-- Loại bỏ tài sản đã thanh lý và vô hiệu hóa khỏi các tính toán chính
-- Đồng bộ dữ liệu đơn vị sử dụng từ [hệ thống OMS](#3-stakeholders)
-- Phân nhóm tài sản theo categories IT/ADM/CMD
+**Yêu cầu chi tiết:**
 
-#### Thông số kỹ thuật Dashboard
+| STT | Nội dung | Giá trị | Loại biểu đồ | Ghi chú |
+|-----|----------|---------|--------------|---------|
+| 1 | Tổng số tài sản | Count số lượng (All tài sản - Đã thanh lý - Vô hiệu hóa) | - | - |
+| 2 | Tổng giá trị | Sum nguyên giá (All tài sản - Đã thanh lý - Vô hiệu hóa) | - | - |
+| 3 | Tình trạng bảo hành | Tỷ lệ phần trăm theo số lượng tài sản còn hạn bảo hành/(All tài sản - Vô hiệu hóa - Đã thanh lý) | - | - |
+| 4 | Tỷ lệ sử dụng | Tỷ lệ phần trăm theo số lượng tài sản có trạng thái đang sử dụng/(All tài sản - Vô hiệu hóa - Đã thanh lý) | - | - |
 
-| Content | Value | Type of Chart | Note |
-|---------|-------|---------------|------|
-| Total assets | Count số lượng (All tài sản - Đã thanh lý - Vô hiệu hóa) | - | - |
-| Total value | Sum nguyên giá (All tài sản - Đã thanh lý - Vô hiệu hóa) | - | - |
-| Warranty status | Tỷ lệ phần trăm theo số lượng tài sản còn hạn bảo hành/(All tài sản - Vô hiệu hóa - Đã thanh lý) | - | - |
-| Utilization rate | Tỷ lệ phần trăm theo số lượng tài sản có trạng thái đang sử dụng/(All tài sản - Vô hiệu hóa - Đã thanh lý) | - | - |
+**Biểu đồ tương tác:**
 
-#### Cấu hình bộ lọc
-
-| Filter Name | Data Source | Type |
-|-------------|-------------|------|
-| Vùng | LOV | Dropdown |
-| Đơn vị sử dụng | LOV đồng bộ từ OMS | Dropdown |
-| CAT 1 | LOV | Dropdown |
-| Group name | LOV | Dropdown |
-| Asset status | LOV asset status (Không bao gồm Đã thanh lý, Vô hiệu hóa) | Dropdown |
-
-#### Đặc tả biểu đồ
-
-| Chart Name | Data Value | Chart Type | Notes |
-|------------|------------|------------|-------|
-| Asset Distribution - Cơ cấu nhóm tài sản theo trạng thái | Nguyên giá | Sunburst (Vòng trong: Nhóm IT/ADM/CMD, Vòng ngoài: Trạng thái) | Khi Hover chuột thể hiện số lượng và giá trị |
-| Asset Distribution - Cơ cấu theo Vùng/Đơn vị | Nguyên giá | Stacked Column | - |
-| Asset Value by Group Name | Nguyên giá | Column | - |
-| Asset Fluctuation Over Time (Month/Year) | Nguyên giá | Line | - |
-| Asset by Time in Use | Số lượng | Scatter | - |
-
----
+| STT | Tên biểu đồ | Dữ liệu | Loại biểu đồ | Ghi chú |
+|-----|-------------|---------|--------------|---------|
+| 1 | Phân bổ tài sản - Cơ cấu nhóm tài sản theo trạng thái | Nguyên giá | Sunburst (Vòng trong: Nhóm IT/ADM/CMD, Vòng ngoài: Trạng thái) | Khi Hover hiển thị số lượng và giá trị |
+| 2 | Phân bổ tài sản - Cơ cấu theo Vùng và Đơn vị sử dụng | Nguyên giá | Stacked Column | - |
+| 3 | Giá trị tài sản theo Group Name | Nguyên giá | Column | - |
+| 4 | Biến động tài sản theo thời gian (Tháng/Năm) | Nguyên giá | Line | - |
+| 5 | Tài sản theo thời gian sử dụng | Số lượng | Scatter | - |
 
 ### 4.2. Warehouse Management Module
 
-Module quản lý kho xử lý toàn bộ quy trình xuất-nhập kho tài sản, hỗ trợ cả việc xử lý tự động và thủ công. Module này tích hợp chặt chẽ với các quy trình cấp tài sản, thanh lý và điều chuyển, đảm bảo tính nhất quán và truy xuất được của toàn bộ vòng đời tài sản.
+Module quản lý kho là một thành phần core của hệ thống, được thiết kế để xử lý toàn bộ quy trình xuất nhập kho tài sản một cách tự động và hiệu quả. Module này bao gồm các quy trình chính: [tạo yêu cầu nhập kho](#421-create-warehouse-intake-request), [phê duyệt yêu cầu nhập kho](#422-approve-warehouse-intake-request), [xác nhận nhập kho](#423-warehouse-intake-confirmation), và các quy trình hỗ trợ khác.
 
-Các quy trình chính bao gồm:
-- [4.2.1. Tạo yêu cầu nhập kho](#421-create-warehouse-intake-request) (tự động từ điều chuyển)
-- [4.2.2. Phê duyệt yêu cầu nhập kho](#422-approve-warehouse-entry-request)
-- [4.2.3. Xác nhận nhập kho](#423-warehouse-receipt-confirmation)
-- [4.2.4. Nhập kho thủ công](#424-manual-warehouse-entry)
-- [4.2.5. Hủy yêu cầu nhập kho](#425-cancel-warehouse-request)
-- [4.2.6. Cấp tài sản và xuất kho](#426-asset-allocation-and-warehouse-exit)
-- [4.2.7. Hủy yêu cầu xuất kho](#427-cancel-warehouse-exit-request)
-- [4.2.8. Điều chuyển giữa các kho](#428-inter-warehouse-transfer)
+Điểm nổi bật của module là khả năng tự động tạo các yêu cầu liên quan, giúp giảm thiểu công việc thủ công và đảm bảo tính liên tục của quy trình. Hệ thống tự động tạo yêu cầu nhập kho sau khi xác nhận điều chuyển về kho, tự động tạo yêu cầu xuất kho sau khi duyệt [cấp tài sản](#43-asset-provisioning-module) hoặc thanh lý tài sản.
+
+Tất cả các quy trình đều có cơ chế phê duyệt đa cấp với khả năng từ chối và quay lại bước trước, đồng thời có các tùy chọn hủy bỏ yêu cầu khi cần thiết. Hệ thống cũng tự động cập nhật trạng thái và tạo các biên bản, bút toán kế toán liên quan.
 
 #### 4.2.1. Create Warehouse Intake Request
 
@@ -154,86 +126,105 @@ Các quy trình chính bao gồm:
 
 Quy trình tạo yêu cầu nhập kho được khởi tạo tự động khi có yêu cầu chuyển kho được xác nhận. Hệ thống sẽ kế thừa toàn bộ thông tin từ yêu cầu chuyển kho bao gồm thông tin tài sản, chi tiết kho đích và các tệp đính kèm.
 
-**Cấu trúc màn hình:**
-- Phần header hiển thị số yêu cầu và trạng thái
-- Phần thông tin chung cho phép nhập tiêu đề và ghi chú
-- Phần chi tiết tài sản hiển thị danh sách tài sản được chuyển
-- Phần tệp đính kèm cho phép upload thêm tài liệu
+Giao diện được thiết kế với cấu trúc rõ ràng bao gồm phần header hiển thị số yêu cầu và trạng thái, phần thông tin chung cho phép nhập tiêu đề và ghi chú, phần chi tiết tài sản hiển thị danh sách tài sản được chuyển với thông tin đầy đủ, và phần tệp đính kèm cho phép upload thêm tài liệu hỗ trợ.
 
-Quy trình xử lý bao gồm 4 bước chính: tạo yêu cầu nhập kho, cập nhật trạng thái các yêu cầu liên quan, cập nhật tasklist cho [AMP và WM](#3-stakeholders), và gửi thông báo email cho Warehouse Manager.
-
-**Các bên liên quan:** Hệ thống (tự động tạo), [Quản lý kho](#3-stakeholders) (phê duyệt), [AMP](#3-stakeholders) (theo dõi)
+Quy trình xử lý bao gồm các bước tìm kiếm yêu cầu điều chuyển, xem chi tiết thông tin, và đưa ra quyết định. AMP có thể từ chối yêu cầu (với việc nhập lý do bắt buộc), xác nhận để tạo yêu cầu nhập kho tự động, hoặc yêu cầu bổ sung thông tin. Hệ thống tự động cập nhật trạng thái, tasklist và gửi thông báo email cho các bên liên quan sau mỗi hành động.
 
 ##### 4.2.1.2. Thông số kỹ thuật chi tiết
 
-Hệ thống tự động sinh số yêu cầu theo format NK.YY.xxxx và kế thừa toàn bộ thông tin từ yêu cầu điều chuyển gốc. Tài sản sẽ được unlock khỏi RQ điều chuyển và lock bởi RQ nhập kho mới để đảm bảo tính nhất quán dữ liệu.
+Dưới đây là đặc tả chi tiết các trường dữ liệu và quy tắc validation cho chức năng tạo yêu cầu nhập kho:
 
-**Đặc tả trường dữ liệu:**
+**Thông tin chung yêu cầu nhập kho:**
 
-| Tab/Section | Operator | Action | Field Name VN | M/O | Field Type | Editable | Max Length | Format | Default Value | Data Rule |
-|-------------|----------|--------|---------------|-----|------------|----------|------------|---------|---------------|-----------|
-| Thông tin chung | System | Display | Số yêu cầu | M | Text | N | 50 | NK.YY.xxxx | | YY = Year, xxxx = số chạy từ 1-9999 không dùng lại |
-| Thông tin chung | System | Display | Ngày tạo | M | Date | N | 50 | MM.DD.YYYY | Today | |
-| Thông tin chung | System | Display | Tiêu đề | M | Text | N | 150 | | | =Tiêu đề RQ điều chuyển |
-| DS tài sản nhập kho | System | Display | Mã tài sản | M | | N | | | | Hiển thị mặc định |
-| DS tài sản nhập kho | System | Display | Tên Tài sản | M | | N | | | | Hiển thị mặc định |
-| DS tài sản nhập kho | System | Display | Mô tả TS | M | | N | | | | Hiển thị mặc định |
-| DS tài sản nhập kho | System | Display | Trạng thái TS | M | | N | | | | Hiển thị mặc định |
-| DS tài sản nhập kho | System | Display | Phân nhóm TS (group name) | M | | N | | | | Hiển thị mặc định |
-| DS tài sản nhập kho | System | Display | Nhóm TS (CAT1) | M | | N | | | | Hiển thị mặc định |
-| DS tài sản nhập kho | System | Display | Số PO | M | | N | | | | Hiển thị mặc định |
-| DS tài sản nhập kho | System | Display | Tên nhà cung cấp | O | | N | | | | Ẩn hiện tùy biến |
-| DS tài sản nhập kho | System | Display | Nguyên giá TS (VAT incl) | M | | N | | | | Ẩn hiện tùy biến |
-| Thông tin kho nhập | System | Display | Tên kho | M | List | N | 50 | | | = Kho trong RQ điều chuyển |
-| Thông tin kho nhập | System | Display | Địa chỉ kho | M | Text | N | 50 | | | Tự động nhận diện, hiển thị theo Tên kho |
-| Thông tin kho nhập | System | Display | Quản lý kho | M | Text | N | 50 | | | Tự động nhận diện (Tên \| Phòng ban \| Email) |
-| Thông tin đầu mối giao hàng | User | Input | Đầu mối | M | Text | N | 50 | | | = Đầu mối giao hàng trong RQ điều chuyển |
-| Thông tin đầu mối giao hàng | User | Input | Số điện thoại | M | Number | N | 52 | | | |
-| Thông tin đầu mối giao hàng | User | Input | Thời gian bàn giao | O | Date | N | 50 | | | |
+| Trường | Operator | Action | Tên trường | M/O | Field type | Editable | Max length | Format | Default value | Data rule |
+|--------|----------|--------|------------|-----|------------|----------|------------|--------|---------------|-----------|
+| Số yêu cầu | System | Display | Số yêu cầu | M | Text | N | 50 | NK.YY.xxxx | | YY = Year, xxxx = số chạy từ 1-9999 không dùng lại |
+| Ngày tạo | System | Display | Ngày tạo | M | Date | N | 50 | MM.DD.YYYY | Today | |
+| Tiêu đề | System | Display | Tiêu đề | M | Text | N | 150 | | | =Tiêu đề RQ điều chuyển |
 
-**Quy trình xử lý từ AMP:**
+**Danh sách tài sản nhập kho (hiển thị mặc định):**
 
-Khi yêu cầu điều chuyển được xử lý, [AMP](#3-stakeholders) có thể từ chối, xác nhận hoặc yêu cầu bổ sung thông tin. Hệ thống hiển thị đầy đủ thông tin tài sản bao gồm thông tin cơ bản, người sử dụng hiện tại, vị trí đặt và thông tin bảo hành.
+| Trường | Operator | Action | Tên trường | M/O | Editable | Data rule |
+|--------|----------|--------|------------|-----|----------|-----------|
+| Mã tài sản | System | Display | Mã tài sản | M | N | Hiển thị mặc định |
+| Tên Tài sản | System | Display | Tên Tài sản | M | N | Hiển thị mặc định |
+| Mô tả TS | System | Display | Mô tả TS | M | N | Hiển thị mặc định |
+| Trạng thái TS | System | Display | Trạng thái TS | M | N | Hiển thị mặc định |
+| Phân nhóm TS | System | Display | Phân nhóm TS (group name) | M | N | Hiển thị mặc định |
+| Nhóm TS | System | Display | Nhóm TS (CAT1) | M | N | Hiển thị mặc định |
+| Số PO | System | Display | Số PO | M | N | Hiển thị mặc định |
+| Tên người sử dụng | System | Display | Tên người sử dụng | M | N | Hiển thị mặc định |
+| Tên đơn vị | System | Display | Tên đơn vị | M | N | Hiển thị mặc định |
+| Đơn vị sử dụng cha | System | Display | Đơn vị sử dụng cha | M | N | Hiển thị mặc định |
 
-**Bảng tìm kiếm yêu cầu:**
+**Thông tin kho nhập:**
 
-| Field name VN | M/O | Field type | Editable | Max length | Operator | Action |
-|---------------|-----|------------|----------|------------|----------|---------|
-| Mã yêu cầu | O | Text | Y | 20 | User | Input |
-| Tiêu đề | O | Text | Y | 100 | User | Input |
-| Người xử lý | O | List | Y | 20 | User | Select |
-| Loại điều chuyển | O | List | Y | 20 | User | Select |
-| Trạng thái | O | List | Y | 20 | User | Select |
-| Người tạo | O | List | Y | 20 | User | Select |
-| Người đề xuất | O | List | Y | 20 | User | Select |
-| Ngày tạo | O | Date | Y | 50 | User | Input |
-| Đơn vị điều chuyển | O | List | Y | 50 | User | Select |
-| Đơn vị nhận điều chuyển | O | List | Y | 50 | User | Select |
+| Trường | Operator | Action | Tên trường | M/O | Field type | Max length | Data source | Data rule |
+|--------|----------|--------|------------|-----|------------|------------|-------------|-----------|
+| Tên kho | System | Display | Tên kho | M | List | 50 | | = Kho trong RQ điều chuyển |
+| Địa chỉ kho | System | Display | Địa chỉ kho | M | Text | 50 | OMS | Tự động nhận diện, hiển thị theo Tên kho |
+| Quản lý kho | System | Display | Quản lý kho | M | Text | 50 | OMS | Tự động nhận diện, hiển thị theo Tên kho (Tên \| Phòng ban \| Email) |
 
-Khi xác nhận, hệ thống tự động tạo yêu cầu nhập kho với số theo format NK.YY.xxxx và chuyển sang [quy trình phê duyệt](#422-approve-warehouse-entry-request).
+Sau khi tạo yêu cầu nhập kho, hệ thống tự động cập nhật trạng thái RQ điều chuyển thành "Đã xác nhận", RQ nhập kho thành "Chờ phê duyệt", cập nhật tasklist AMP thành "Đã xử lý" và WM thành "Cần xử lý", đồng thời gửi email thông báo cho Warehouse Manager để xử lý tiếp.
 
-#### 4.2.2. Approve Warehouse Entry Request
+#### 4.2.2. Approve Warehouse Intake Request
 
 ##### 4.2.2.1. Thông số kỹ thuật giao diện người dùng
 
-![Giao diện phê duyệt yêu cầu nhập kho](images/5.1.2a_B6_image2.png)
+![Giao diện phê duyệt yêu cầu nhập kho](images/5_1_2a_B6_image2.png)
 
-Quy trình phê duyệt yêu cầu nhập kho được thiết kế cho [Warehouse Manager](#3-stakeholders) để xem xét và phê duyệt các yêu cầu nhập kho tài sản. Giao diện hiển thị toàn bộ thông tin chi tiết về yêu cầu và tài sản để hỗ trợ quyết định phê duyệt.
+Giao diện phê duyệt yêu cầu nhập kho được thiết kế để Warehouse Manager có thể xem xét và đưa ra quyết định phê duyệt các yêu cầu nhập kho tài sản. Màn hình bao gồm phần tìm kiếm yêu cầu với các tiêu chí lọc đa dạng, phần hiển thị kết quả tìm kiếm và phần chi tiết yêu cầu với thông tin đầy đủ về tài sản.
 
-**Luồng xử lý:**
-1. Warehouse Manager tìm kiếm yêu cầu cần xử lý
-2. Xem chi tiết thông tin tài sản và yêu cầu
-3. Đưa ra quyết định phê duyệt hoặc từ chối
-4. Hệ thống cập nhật trạng thái và thông báo
+Giao diện hiển thị thông tin tài sản toàn diện với hơn 20 trường thông tin bao gồm thông tin cơ bản, thông tin người sử dụng, thông tin bảo hành và các thông tin khác. Hệ thống hỗ trợ tùy biến hiển thị các trường thông tin theo nhu cầu của người dùng.
+
+Warehouse Manager có hai lựa chọn chính: từ chối yêu cầu (yêu cầu nhập lý do bắt buộc) hoặc phê duyệt. Khi từ chối, hệ thống sẽ unlock tài sản và cập nhật trạng thái về "Từ chối". Khi phê duyệt, hệ thống chuyển trạng thái thành "Chờ nhập kho" và tạo task cho Warehouse Keeper.
 
 ##### 4.2.2.2. Thông số kỹ thuật chi tiết
 
-Giao diện được thiết kế với nhiều phần thông tin chi tiết bao gồm danh sách tài sản cần nhập kho với 25+ thuộc tính có thể tùy biến hiển thị, thông tin kho đích, đầu mối giao hàng và lịch sử xử lý.
-
 **Bảng tìm kiếm yêu cầu:**
 
-| Trường | Operator | Action | Field name VN | M/O | Field type | Editable | Max length |
-|--------|----------|---------|---------------|-----|------------|----------|------------|
+| Trường | Operator | Action | Tên trường | M/O | Kiểu | Chỉnh sửa | Độ dài |
+|--------|----------|---------|------------|-----|------|-----------|---------|
+| Tìm kiếm yêu cầu | User | Input | Số yêu cầu | O | Text | Y | 20 |
+| | User | Input | Ngày tạo | O | Date | Y | 20 |
+| | User | Input | Tiêu đề | O | Text | Y | 150 |
+| | User | Select | Người tạo | O | List | Y | 20 |
+| | User | Select | Trạng thái yêu cầu | O | List | Y | 20 |
+| | User | Select | Người xử lý | O | List | Y | 20 |
+| | User | Input | Ngày xác nhận | O | Date | Y | 20 |
+
+**Bảng hiển thị danh sách yêu cầu:**
+
+| Trường | Operator | Action | Tên trường | M/O | Kiểu | Chỉnh sửa | Độ dài |
+|--------|----------|---------|------------|-----|------|-----------|---------|
+| Kết quả | System | Display | Số yêu cầu | M | Text | N | 20 |
+| | System | Display | Ngày tạo | M | Date | N | 20 |
+| | System | Display | Tiêu đề | M | Text | N | 150 |
+| | System | Display | Người tạo | M | Text | N | 20 |
+| | System | Display | Trạng thái yêu cầu | M | Text | N | 20 |
+| | System | Display | Người xử lý | O | Text | N | 20 |
+| | System | Display | Ngày xác nhận | O | Date | N | 20 |
+
+Quy trình phê duyệt được thiết kế với workflow tự động: khi Warehouse Manager từ chối yêu cầu, hệ thống tự động unlock tài sản để có thể sử dụng cho các yêu cầu khác, cập nhật tasklist cho AMP và BU user, và gửi email thông báo. Khi phê duyệt, hệ thống cập nhật trạng thái yêu cầu, tạo task cho WK và gửi thông báo tương ứng.
+
+#### 4.2.3. Warehouse Intake Confirmation
+
+##### 4.2.3.1. Thông số kỹ thuật giao diện người dùng
+
+![Giao diện xác nhận nhập kho](images/5_1_3a_B5_image3.png)
+
+Chức năng xác nhận nhập kho là bước cuối cùng trong quy trình nhập kho, được thực hiện bởi Warehouse Keeper. Giao diện cho phép WK tìm kiếm các yêu cầu nhập kho đã được phê duyệt, xem chi tiết thông tin tài sản và thực hiện xác nhận nhập kho thực tế.
+
+Màn hình hiển thị đầy đủ thông tin về yêu cầu bao gồm thông tin chung, danh sách tài sản với hơn 25 trường thông tin chi tiết, thông tin kho nhập, đầu mối giao hàng và lịch sử xử lý. WK có thể từ chối (yêu cầu nhập lý do) hoặc xác nhận nhập kho.
+
+Hệ thống có workflow tự động để cập nhật trạng thái yêu cầu, unlock tài sản, cập nhật thông tin tài sản (đặc biệt là trường "Ngày bắt đầu sử dụng" nếu đang là N/A) và gửi thông báo cho các bên liên quan.
+
+##### 4.2.3.2. Thông số kỹ thuật chi tiết
+
+**Bảng thông tin tìm kiếm yêu cầu:**
+
+| Operator | Action | Field name VN | M/O | Field type | Editable | Max length |
+|----------|--------|---------------|-----|------------|----------|------------|
 | User | Input | Số yêu cầu | O | Text | Y | 20 |
 | User | Input | Ngày tạo | O | Date | Y | 20 |
 | User | Input | Tiêu đề | O | Text | Y | 150 |
@@ -242,562 +233,398 @@ Giao diện được thiết kế với nhiều phần thông tin chi tiết bao
 | User | Select | Người xử lý | O | List | Y | 20 |
 | User | Input | Ngày xác nhận | O | Date | Y | 20 |
 
-**Bảng hiển thị tài sản:**
+**Bảng danh sách tài sản nhập kho (các trường chính):**
 
-| Operator | Action | Field name VN | M/O | Data rule |
-|----------|---------|---------------|-----|-----------|
-| System | Display | Mã tài sản | M | Hiển thị mặc định |
-| System | Display | Tên Tài sản | M | Hiển thị mặc định |
-| System | Display | Mô tả TS | M | Hiển thị mặc định |
-| System | Display | Trạng thái TS | M | Hiển thị mặc định |
-| System | Display | Phân nhóm TS (group name) | M | Hiển thị mặc định |
-| System | Display | Nhóm TS (CAT1) | M | Hiển thị mặc định |
-| System | Display | Số PO | M | Hiển thị mặc định |
-| System | Display | Tên nhà cung cấp | O | Ẩn hiện tùy biến |
-| System | Display | Nguyên giá TS (VAT incl) | M | Ẩn hiện tùy biến |
-| System | Display | Tên người sử dụng | M | Hiển thị mặc định |
-| System | Display | Tên đơn vị | M | Hiển thị mặc định |
-| System | Display | Đơn vị sử dụng cha | M | Hiển thị mặc định |
+| Operator | Action | Field name VN | M/O | Field type | Editable | Data rule |
+|----------|--------|---------------|-----|------------|----------|-----------|
+| System | Display | Mã tài sản | M | - | N | Hiển thị mặc định |
+| System | Display | Tên Tài sản | M | - | N | Hiển thị mặc định |
+| System | Display | Mô tả TS | M | - | N | Hiển thị mặc định |
+| System | Display | Trạng thái TS | M | - | N | Hiển thị mặc định |
+| System | Display | Phân nhóm TS (group name) | M | - | N | Hiển thị mặc định |
+| System | Display | Nhóm TS (CAT1) | M | - | N | Hiển thị mặc định |
+| System | Display | Số PO | M | - | N | Hiển thị mặc định |
+| System | Display | Tên nhà cung cấp | O | - | N | Ẩn hiện tùy biến |
+| System | Display | Nguyên giá TS (VAT incl) | M | - | N | Ẩn hiện tùy biến |
 
-Khi từ chối, hệ thống yêu cầu nhập lý do từ chối (bắt buộc, max 150 ký tự) và tự động unlock tài sản. Khi phê duyệt, chuyển sang [quy trình xác nhận nhập kho](#423-warehouse-receipt-confirmation).
+Khi WK xác nhận nhập kho, hệ thống tự động cập nhật trường "Ngày bắt đầu sử dụng" thành ngày xác nhận nếu trường này đang có giá trị N/A, unlock tài sản để có thể sử dụng cho các yêu cầu khác, và hoàn tất quy trình nhập kho.
 
-#### 4.2.3. Warehouse Receipt Confirmation
+#### 4.2.4. Manual Warehouse Intake Process
 
-##### 4.2.3.1. Thông số kỹ thuật giao diện người dùng
-
-![Giao diện xác nhận nhập kho](images/5_1_3a_B5_image3.png)
-
-Quy trình xác nhận nhập kho là bước cuối cùng trong chu trình nhập kho, được thực hiện bởi [Warehouse Keeper](#3-stakeholders) để xác nhận việc nhận tài sản vào kho.
-
-##### 4.2.3.2. Thông số kỹ thuật chi tiết
-
-Giao diện cho phép [WK](#3-stakeholders) tìm kiếm, xem chi tiết và xác nhận nhận tài sản vào kho. Khi xác nhận, hệ thống tự động cập nhật "Ngày bắt đầu sử dụng" nếu trường này đang là N/A.
-
-**Bảng tìm kiếm yêu cầu:**
-
-| Field name VN | M/O | Field type | Editable | Max length | Operator | Action |
-|---------------|-----|------------|----------|------------|----------|---------|
-| Số yêu cầu | O | Text | Y | 20 | User | Input |
-| Ngày tạo | O | Date | Y | 20 | User | Input |
-| Tiêu đề | O | Text | Y | 150 | User | Input |
-| Người tạo | O | List | Y | 20 | User | Select |
-| Trạng thái yêu cầu | O | List | Y | 20 | User | Select |
-| Người xử lý | O | List | Y | 20 | User | Select |
-| Ngày xác nhận | O | Date | Y | 20 | User | Input |
-
-**Quy trình xử lý:**
-- Khi xác nhận: cập nhật trạng thái "Đã nhập kho", unlock tài sản
-- Khi từ chối: cập nhật trạng thái request điều chuyển liên quan, unlock tài sản
-- Gửi thông báo email cho [AMP](#3-stakeholders) theo từng trường hợp
-
-#### 4.2.4. Manual Warehouse Entry
+Module nhập kho thủ công cung cấp khả năng tạo yêu cầu nhập kho độc lập, không thông qua quy trình tự động từ [điều chuyển về kho](#421-create-warehouse-intake-request). Quy trình này hữu ích cho các trường hợp nhập kho đặc biệt hoặc tài sản mới không thông qua quy trình điều chuyển.
 
 ##### 4.2.4.1. Thông số kỹ thuật giao diện người dùng
 
-Chức năng nhập kho thủ công cho phép người dùng tạo yêu cầu nhập kho không thông qua các quy trình tự động. Giao diện hỗ trợ tìm kiếm tài sản theo nhiều tiêu chí và chọn tài sản cần nhập kho.
+![Giao diện tạo yêu cầu nhập kho thủ công](images/5_2_1a_B5_image4.png)
+
+Giao diện tạo yêu cầu nhập kho thủ công cho phép người dùng tạo mới yêu cầu nhập kho với đầy đủ thông tin. Màn hình bao gồm các phần: thông tin chung, chức năng tìm kiếm tài sản với nhiều tiêu chí lọc, danh sách tài sản được chọn và thông tin kho nhập.
+
+Hệ thống hỗ trợ tìm kiếm tài sản theo các tiêu chí như mã tài sản, tên, phân loại, nhóm, PO number, trạng thái, nhà cung cấp và vị trí. Người dùng có thể chọn nhiều tài sản cùng lúc và hệ thống sẽ cảnh báo nếu tài sản đang bị lock trong request khác.
 
 ##### 4.2.4.2. Thông số kỹ thuật chi tiết
 
 **Bảng thông tin chung yêu cầu:**
 
-| Trường | Operator | Action | Tên trường | M/O | Kiểu | Editable | Max Length | Format | Default | Data Rule |
-|--------|----------|--------|------------|-----|------|----------|------------|--------|---------|-----------|
-| Số yêu cầu | System | Display | Số yêu cầu | M | Text | N | 50 | NK.YY.xxxx | | YY = Year, xxxx = số chạy từ 1-9999 không dùng lại |
-| Ngày tạo | System | Display | Ngày tạo | M | Date | N | 50 | MM.DD.YYYY | Today | |
-| Tiêu đề | User | Input | Tiêu đề | O | Text | Y | 150 | | | |
+| STT | Tab/Section | Operator | Action | Field name VN | M/O | Field type | Editable | Max length | Format | Default value | Data rule |
+|-----|-------------|----------|--------|---------------|-----|------------|----------|------------|--------|---------------|-----------|
+| 1 | Thông tin chung | System | Display | Số yêu cầu | M | Text | N | 50 | NK.YY.xxxx | | YY = Year, xxxx = số chạy từ 1-9999 không dùng lại |
+| 2 | Thông tin chung | System | Display | Ngày tạo | M | Date | N | 50 | MM.DD.YYYY | Today | |
+| 3 | Thông tin chung | User | Input | Tiêu đề | O | Text | Y | 150 | | | |
+| 4 | Thông tin chung | User | Select | Thêm tài sản | M | Button | N | | | | |
 
-**Bảng tìm kiếm tài sản:**
+**Bảng thông tin kho và giao hàng:**
 
-| Trường | Operator | Action | Tên trường | M/O | Kiểu | Editable | Max Length |
-|--------|----------|--------|------------|-----|------|----------|------------|
-| Mã tài sản | User | Input | Mã tài sản | O | Text | N | 20 |
-| Tên tài sản | User | Input | Tên tài sản | O | Text | Y | 20 |
-| Phân loại tài sản | User | Select | Phân loại tài sản | O | List | N | 20 |
-| Nhóm tài sản | User | Select | Nhóm tài sản | O | List | N | 20 |
-| PO number | User | Input | PO number | O | Text | Y | 20 |
-| Trạng thái TS | User | Select | Trạng thái TS | O | List | N | 50 |
-| Tên nhà cung cấp | User | Select | Tên nhà cung cấp | O | List | N | 50 |
-| Tên kho | User | Input | Tên kho | O | List | Y | 50 |
-| Vị trí đặt tài sản | User | Select | Vị trí đặt tài sản | O | Text | N | 100 |
+| STT | Tab/Section | Operator | Action | Field name VN | M/O | Field type | Editable | Max length | Data source | Data rule |
+|-----|-------------|----------|--------|---------------|-----|------------|----------|------------|-------------|-----------|
+| 1 | Thông tin kho nhập | System/User | Display/Search/Select | Tên kho | M | List | N | 50 | | |
+| 2 | Thông tin kho nhập | System | Display | Địa chỉ kho | M | Text | Y | 50 | OMS | Tự động nhận diện, hiển thị theo Tên kho |
+| 3 | Thông tin kho nhập | System | Display | Quản lý kho | M | Text | N | 50 | OMS | Tự động nhận diện, hiển thị theo Tên kho (Tên \| Phòng ban \| Email) |
 
-**Yêu cầu đặc biệt:**
-- Hệ thống cảnh báo khi tài sản được chọn đang bị lock trong request khác
-- Cho phép chọn nhiều tài sản trong một yêu cầu
-- Tự động nhận diện thông tin kho từ [hệ thống OMS](#3-stakeholders)
+Sau khi tạo yêu cầu, hệ thống tự động lock các tài sản được chọn, cập nhật trạng thái yêu cầu thành "Chờ phê duyệt", cập nhật tasklist và gửi email thông báo cho Warehouse Manager để tiến hành [phê duyệt yêu cầu](#422-approve-warehouse-intake-request).
 
-Quy trình sau khi tạo yêu cầu sẽ chuyển sang [phê duyệt](#422-approve-warehouse-entry-request) và [xác nhận](#423-warehouse-receipt-confirmation) tương tự như quy trình tự động.
+Quy trình phê duyệt và xác nhận nhập kho thủ công tương tự như quy trình tự động, đều thông qua các bước [phê duyệt](#422-approve-warehouse-intake-request) và [xác nhận nhập kho](#423-warehouse-intake-confirmation).
 
-#### 4.2.5. Cancel Warehouse Request
+#### 4.2.5. Cancel Warehouse Intake Request
 
 ##### 4.2.5.1. Thông số kỹ thuật giao diện người dùng
 
-Chức năng hủy yêu cầu nhập kho cho phép [AMP](#3-stakeholders) hủy bỏ các yêu cầu nhập kho đã tạo với điều kiện yêu cầu chưa ở trạng thái "Đã nhập kho".
+![Giao diện hủy yêu cầu nhập kho](images/5_3_1a_B5_image7.png)
+
+Chức năng hủy yêu cầu nhập kho cho phép AMP hủy bỏ các yêu cầu nhập kho đã được tạo nhưng chưa hoàn thành. Điều kiện áp dụng là yêu cầu nhập kho phải có trạng thái khác "Đã nhập kho".
+
+Giao diện cho phép tìm kiếm yêu cầu theo nhiều tiêu chí, xem chi tiết thông tin và thực hiện hủy yêu cầu với việc nhập lý do bắt buộc. Hệ thống sẽ tự động unlock tài sản để có thể sử dụng cho các yêu cầu khác.
 
 ##### 4.2.5.2. Thông số kỹ thuật chi tiết
 
-**Điều kiện tiên quyết:** Yêu cầu nhập kho phải có trạng thái khác "Đã nhập kho"
+**Form tìm kiếm yêu cầu:**
+
+| Trường | Operator | Action | Tên trường | M/O | Kiểu | Editable | Max length |
+|---------|-----------|---------|------------|-----|------|----------|------------|
+| User | Input | Số yêu cầu | O | Text | Y | 20 |
+| User | Input | Ngày tạo | O | Date | Y | 20 |
+| User | Input | Tiêu đề | O | Text | Y | 150 |
+| User | Select | Người tạo | O | List | Y | 20 |
+| User | Select | Trạng thái yêu cầu | O | List | Y | 20 |
+| User | Select | Người xử lý | O | List | Y | 20 |
+| User | Input | Ngày xác nhận | O | Date | Y | 20 |
+
+**Lý do hủy:**
+
+| Trường | Operator | Action | M/O | Kiểu | Editable | Max length |
+|---------|-----------|---------|-----|------|----------|------------|
+| User | Nhập | Lý do hủy | M | Text | Y | 150 |
+
+Khi hủy yêu cầu nhập kho, hệ thống tự động cập nhật trạng thái yêu cầu thành "Đã hủy", unlock tài sản, cập nhật tasklist cho WM và AMP/BU user, và gửi email thông báo cho các bên liên quan. Đối với yêu cầu nhập kho được tạo từ [điều chuyển về kho](#421-create-warehouse-intake-request), hệ thống cũng cập nhật ngược trạng thái yêu cầu điều chuyển liên quan.
+
+### 4.3. Asset Provisioning Module
+
+Module cấp tài sản xử lý quy trình phân phối tài sản từ kho đến người dùng cuối thông qua workflow phê duyệt được thiết kế chặt chẽ. Module này tích hợp chặt chẽ với [module quản lý kho](#42-warehouse-management-module) để tự động tạo các yêu cầu xuất kho sau khi phê duyệt cấp tài sản.
+
+#### 4.3.1. Thông số kỹ thuật giao diện người dùng
+
+![Giao diện phê duyệt yêu cầu cấp tài sản](images/5_4_0a_A4_image8.png)
+
+Giao diện phê duyệt yêu cầu cấp tài sản được thiết kế cho Asset Manager để xem xét và phê duyệt các yêu cầu cấp phát tài sản. Màn hình hiển thị thông tin chi tiết về yêu cầu, danh sách tài sản cần cấp và thông tin đơn vị nhận.
+
+#### 4.3.2. Thông số kỹ thuật chi tiết
 
 **Bảng tìm kiếm yêu cầu:**
 
-| STT | Operator | Action | Field Name | M/O | Field Type | Editable | Max Length |
-|-----|----------|--------|------------|-----|------------|----------|------------|
-| 1 | User | Input | Số yêu cầu | O | Text | Y | 20 |
-| 2 | User | Input | Ngày tạo | O | Date | Y | 20 |
-| 3 | User | Input | Tiêu đề | O | Text | Y | 150 |
-| 4 | User | Select | Người tạo | O | List | Y | 20 |
-| 5 | User | Select | Trạng thái yêu cầu | O | List | Y | 20 |
-| 6 | User | Select | Người xử lý | O | List | Y | 20 |
-| 7 | User | Input | Ngày xác nhận | O | Date | Y | 20 |
+| STT | Operator | Action | Field name VN | M/O | Field type | Editable | Max length |
+|-----|----------|--------|---------------|-----|------------|----------|------------|
+| 1 | User | Input | Mã yêu cầu | M | Text | Y | 20 |
+| 2 | User | Input | Tiêu đề | M | Text | Y | 150 |
+| 3 | User | Select | Người tạo | M | List | Y | 20 |
+| 4 | User | Select | Trạng thái | M | List | Y | 20 |
+| 5 | User | Input | Ngày tạo | M | Date | Y | 20 |
+| 6 | User | Select | Loại cấp tài sản | M | List | Y | 100 |
+| 7 | User | Select | Người xử lý | M | List | Y | 20 |
+| 8 | User | Input | Ngày xác nhận | M | Date | Y | 20 |
 
-**Quy trình hủy:**
-1. [AMP](#3-stakeholders) tìm kiếm và chọn yêu cầu cần hủy
-2. Nhập lý do hủy (bắt buộc)
-3. Hệ thống unlock tài sản, cập nhật trạng thái "Đã hủy"
-4. Gửi thông báo cho [BU/user](#3-stakeholders) và cập nhật tasklist
+**Bảng thông tin tài sản cấp:**
 
-#### 4.2.6. Asset Allocation and Warehouse Exit
+| STT | Operator | Action | Field name VN | M/O | Display Rule |
+|-----|----------|--------|---------------|-----|--------------|
+| 1 | System | Display | Mã tài sản | M | Hiển thị mặc định |
+| 2 | System | Display | Tên Tài sản | M | Hiển thị mặc định |
+| 3 | System | Display | Mô tả TS | M | Hiển thị mặc định |
+| 4 | System | Display | Trạng thái TS | M | Hiển thị mặc định |
+| 5 | System | Display | Phân nhóm TS (group name) | M | Hiển thị mặc định |
+| 6 | System | Display | Nhóm TS (CAT1) | M | Hiển thị mặc định |
+| 7 | System | Display | Số PO | M | Hiển thị mặc định |
+| 8 | System | Display | Tên nhà cung cấp | O | Ẩn hiện tùy biến |
+| 9 | System | Display | Nguyên giá TS (VAT incl) | M | Ẩn hiện tùy biến |
+| 10 | System | Display | Tên người sử dụng | M | Hiển thị mặc định |
+| 11 | System | Display | Tên đơn vị | M | Hiển thị mặc định |
+| 12 | System | Display | Đơn vị sử dụng cha | M | Hiển thị mặc định |
 
-##### 4.2.6.1. Thông số kỹ thuật giao diện người dùng
+Khi Asset Manager phê duyệt yêu cầu cấp tài sản, hệ thống tự động tạo [yêu cầu xuất kho](#45-warehouse-export-module) tương ứng và kích hoạt quy trình xuất kho. Nếu từ chối, hệ thống sẽ unlock tài sản để có thể sử dụng cho các yêu cầu khác và thông báo cho AMP.
 
-![Giao diện phê duyệt yêu cầu cấp tài sản](images/5.4.0a_A4_image8.png)
+### 4.4. Inter-Warehouse Transfer Module
 
-Module cấp tài sản xử lý việc phê duyệt yêu cầu cấp phát tài sản và tự động tạo yêu cầu xuất kho tương ứng. Quy trình được chia thành các giai đoạn từ phê duyệt yêu cầu đến xuất kho và bàn giao tài sản.
+Module điều chuyển tài sản giữa các kho cho phép di chuyển tài sản từ kho này sang kho khác thông qua quy trình phê duyệt có kiểm soát. Module này là một phần quan trọng trong việc tối ưu hóa phân bổ tài sản và quản lý inventory theo địa lý.
 
-##### 4.2.6.2. Thông số kỹ thuật chi tiết
+#### 4.4.1. Create Inter-Warehouse Transfer Request
 
-**Quy trình phê duyệt yêu cầu cấp tài sản:**
-
-Giao diện cho phép [Asset Manager](#3-stakeholders) tìm kiếm, xem chi tiết và phê duyệt yêu cầu cấp tài sản. Sau khi phê duyệt, hệ thống tự động tạo yêu cầu xuất kho với format số "XK.YY.xxxx".
-
-**Bảng tìm kiếm yêu cầu:**
-
-| Tên trường | Operator | Action | Loại trường | Bắt buộc | Có thể chỉnh sửa | Độ dài tối đa |
-|------------|----------|--------|-------------|----------|------------------|---------------|
-| Mã yêu cầu | User | Input | Text | M | Y | 20 |
-| Tiêu đề | User | Input | Text | M | Y | 150 |
-| Người tạo | User | Select | List | M | Y | 20 |
-| Trạng thái | User | Select | List | M | Y | 20 |
-| Ngày tạo | User | Input | Date | M | Y | 20 |
-| Loại cấp tài sản | User | Select | List | M | Y | 100 |
-| Người xử lý | User | Select | List | M | Y | 20 |
-| Ngày xác nhận | User | Input | Date | M | Y | 20 |
-
-**Tạo yêu cầu xuất kho:**
-
-Khi yêu cầu cấp tài sản được phê duyệt, hệ thống tự động tạo yêu cầu xuất kho với các thông tin:
-
-**Bảng đặc tả trường dữ liệu chính:**
-
-| Phân nhóm | Tên trường | Operator | Action | M/O | Field Type | Editable | Max Length | Format | Default Value | Data Rule |
-|-----------|------------|----------|---------|-----|------------|----------|------------|--------|---------------|-----------|
-| **Thông tin chung** |
-| | Số yêu cầu | System | Display | M | Text | N | 50 | XK.YY.xxxx | | YY = Year, xxxx = số chạy từ 1-9999 không dùng lại |
-| | Ngày tạo | System | Display | M | Date | N | 50 | MM.DD.YYYY | Today | |
-| | Tiêu đề | System | Input | O | Text | Y | 150 | | | =Tiêu đề RQ Cấp/Thanh lý |
-| **DS tài sản xuất kho** |
-| | Mã tài sản | System | Display | M | | N | | | | Hiển thị mặc định |
-| | Tên Tài sản | System | Display | M | | N | | | | Hiển thị mặc định |
-| | Mô tả TS | System | Display | M | | N | | | | Hiển thị mặc định |
-| | Trạng thái TS | System | Display | M | | N | | | | Hiển thị mặc định |
-| **Thông tin kho xuất** |
-| | Tên kho | System/User | Display/Search/Select | M | List | N | 50 | | | = Thông tin kho trên RQ cấp/Thanh lý |
-| | Địa chỉ kho | System | Display | M | Text | Y | 50 | | | |
-| | Quản lý kho | System | Display | M | Text | N | 50 | | | |
-
-**Quy trình tiếp nhận yêu cầu xuất kho:**
-
-[Warehouse Keeper](#3-stakeholders) tiếp nhận và xử lý yêu cầu xuất kho thông qua giao diện chuyên dụng. Lưu ý rằng nút "Từ chối" sẽ bị ẩn nếu yêu cầu xuất kho xuất phát từ yêu cầu thanh lý.
-
-**Quy trình phê duyệt xuất kho:**
-
-[Warehouse Manager](#3-stakeholders) phê duyệt yêu cầu xuất kho sau khi [WK](#3-stakeholders) đồng ý. Quy trình này đảm bảo kiểm soát kép trước khi tài sản được xuất khỏi kho.
-
-**Quy trình nhận tài sản:**
-
-[BU User](#3-stakeholders) xác nhận nhận tài sản từ kho, hoàn tất quy trình cấp phát tài sản. Khi xác nhận, hệ thống cập nhật thông tin sở hữu tài sản và trạng thái sử dụng.
-
-#### 4.2.7. Cancel Warehouse Exit Request
-
-##### 4.2.7.1. Thông số kỹ thuật giao diện người dùng
-
-Chức năng hủy yêu cầu xuất kho cho phép [AMP](#3-stakeholders) hủy bỏ các yêu cầu xuất kho với điều kiện chưa ở trạng thái "Đã xác nhận".
-
-##### 4.2.7.2. Thông số kỹ thuật chi tiết
-
-**Điều kiện tiên quyết:** Yêu cầu xuất kho phải có trạng thái khác "Đã xác nhận"
-
-**Bảng tìm kiếm yêu cầu xuất kho:**
-
-| Trường | Operator | Action | Tên trường | M/O | Kiểu | Chỉnh sửa | Độ dài | Định dạng |
-|--------|----------|--------|------------|-----|------|-----------|--------|-----------|
-| Tasklist | User | - | Mã yêu cầu | M | Text | N | 20 | - |
-| Tasklist | User | - | Tiêu đề | M | Text | N | 150 | - |
-| Tasklist | User | - | Người tạo | M | List | N | 20 | - |
-| Tasklist | User | - | Trạng thái | M | List | N | 20 | - |
-| Tasklist | User | - | Ngày tạo | M | Date | N | 20 | - |
-| Tasklist | User | - | Nghiệp vụ kho | M | List | N | 100 | - |
-| Tasklist | User | - | Người xử lý | O | List | N | 20 | - |
-| Tasklist | User | - | Ngày xác nhận | O | Date | N | 20 | - |
-
-**Quy trình hủy:**
-- Bắt buộc nhập lý do hủy (max 150 ký tự)
-- Hệ thống unlock tài sản và trả về trạng thái trước thanh lý
-- Nút "Từ chối" được ẩn đối với yêu cầu xuất kho liên kết với thanh lý
-- Gửi thông báo cho [Warehouse Manager](#3-stakeholders) khi hoàn tất
-
-Khi hủy yêu cầu xuất kho, hệ thống sẽ tự động hủy các yêu cầu liên quan (thanh lý, cấp tài sản) để đảm bảo tính nhất quán dữ liệu.
-
-#### 4.2.8. Inter-Warehouse Transfer
-
-##### 4.2.8.1. Thông số kỹ thuật giao diện người dùng
+##### 4.4.1.1. Thông số kỹ thuật giao diện người dùng
 
 ![Giao diện tạo yêu cầu điều chuyển kho](images/5_6_1a_B6_image14.png)
 
-Chức năng điều chuyển tài sản giữa các kho cho phép di chuyển tài sản từ kho này sang kho khác trong cùng hệ thống. Quy trình bao gồm tạo yêu cầu, phê duyệt và thực hiện điều chuyển.
+Chức năng tạo yêu cầu điều chuyển kho cho phép người dùng tạo các yêu cầu di chuyển tài sản từ kho này sang kho khác. Giao diện bao gồm các section: thông tin chung, tìm kiếm tài sản, danh sách tài sản được chọn và thông tin kho đi/kho nhận.
 
-##### 4.2.8.2. Thông số kỹ thuật chi tiết
+##### 4.4.1.2. Thông số kỹ thuật chi tiết
 
-**Tạo yêu cầu điều chuyển kho:**
+**Bảng đặc tả trường thông tin chung:**
 
-Giao diện hỗ trợ tìm kiếm tài sản đa tiêu chí và tạo yêu cầu điều chuyển với đầy đủ thông tin kho đi, kho nhận và đầu mối giao nhận.
+| Tab/Section | Operator | Action | Field name VN | M/O | Field type | Editable | Max length | Format | Default value | Data source | Data rule |
+|-------------|----------|--------|---------------|-----|------------|----------|------------|--------|---------------|-------------|-----------|
+| Thông tin chung | System | Display | Số yêu cầu | M | Text | N | 50 | CK.YY.xxxx | | | YY = Year, xxxx = số chạy từ 1-9999 |
+| | System | Display | Ngày tạo | M | Date | N | 50 | MM.DD.YYYY | Today | | |
+| | User | Input | Tiêu đề | O | Text | Y | 150 | | | | |
+| | User | Select | Thêm tài sản | M | Button | N | | | | | |
 
-**Bảng thông tin chung:**
+**Bảng đặc tả thông tin kho:**
 
-| Tab/Section | Operator | Action | Field name VN | M/O | Field type | Editable | Max length | Format | Default value | Data rule |
-|-------------|----------|---------|---------------|-----|------------|----------|------------|---------|---------------|-----------|
-| Thông tin chung | System | Display | Số yêu cầu | M | Text | N | 50 | CK.YY.xxxx | | YY = Year, xxxx = số chạy từ 1-9999 không dùng lại |
-| Thông tin chung | System | Display | Ngày tạo | M | Date | N | 50 | MM.DD.YYYY | Today | |
-| Thông tin chung | User | Input | Tiêu đề | O | Text | Y | 150 | | | |
-| Thông tin chung | User | Select | Thêm tài sản | M | Button | N | | | | |
+| Tab/Section | Field name VN | M/O | Field type | Editable | Max length | Data source | Data rule | Operator | Action |
+|-------------|---------------|-----|------------|----------|------------|-------------|-----------|----------|--------|
+| Thông tin kho đi | Tên kho | M | List | N | 50 | | | System/User | Display/Search/Select |
+| | Địa chỉ kho | M | Text | Y | 50 | OMS | Tự động nhận diện theo Tên kho | System | Display |
+| | Quản lý kho | M | Text | N | 50 | OMS | Hiển thị Tên\|Phòng ban\|Email | System | Display |
+| Thông tin kho nhập | Tên kho | M | List | N | 50 | | | User | Select |
+| | Địa chỉ kho | M | Text | Y | 50 | OMS | Tự động nhận diện theo Tên kho | System | Display |
+| | Quản lý kho | M | Text | N | 50 | OMS | Hiển thị Tên\|Phòng ban\|Email | System | Display |
 
-**Bảng tìm kiếm tài sản:**
+Sau khi tạo yêu cầu, hệ thống tự động khóa tài sản, cập nhật trạng thái "Chờ phê duyệt", tìm và gán người duyệt (AM/Warehouse Manager), cập nhật tasklist và gửi email thông báo đến các bên liên quan.
 
-| Field name VN | M/O | Field type | Editable | Max length | Data rule |
-|---------------|-----|------------|----------|------------|-----------|
-| Mã tài sản | O | Text | N | 20 | |
-| Tên tài sản | O | Text | Y | 20 | |
-| Phân loại tài sản | O | List | N | 20 | |
-| Nhóm tài sản | O | List | N | 20 | |
-| PO number | O | Text | Y | 20 | |
-| Trạng thái TS | O | List | N | 50 | |
-| Tên nhà cung cấp | O | List | N | 50 | |
-| Tên kho | O | List | Y | 50 | |
-| Vị trí đặt tài sản | O | Text | N | 100 | |
+#### 4.4.2. Approve Inter-Warehouse Transfer Request
 
-**Phê duyệt yêu cầu điều chuyển kho:**
+##### 4.4.2.1. Thông số kỹ thuật giao diện người dùng
 
-[Approver](#3-stakeholders) xem xét và phê duyệt yêu cầu điều chuyển. Khi phê duyệt, hệ thống tự động tạo biên bản điều chuyển và cập nhật thông tin kho của tài sản.
+Giao diện phê duyệt yêu cầu điều chuyển tài sản giữa các kho được thiết kế cho Approver để xem xét và đưa ra quyết định phê duyệt. Màn hình bao gồm chức năng tìm kiếm yêu cầu, hiển thị thông tin chi tiết tài sản và form quyết định phê duyệt.
 
-**Bảng tìm kiếm yêu cầu điều chuyển:**
+##### 4.4.2.2. Thông số kỹ thuật chi tiết
 
-| Field name VN | M/O | Field type | Editable | Max length | Operator |
-|---------------|-----|------------|----------|------------|----------|
-| Số yêu cầu | O | Text | Y | 20 | Input |
-| Ngày tạo | O | Date | Y | 20 | Input |
-| Tiêu đề | O | Text | Y | 150 | Input |
-| Người tạo | O | List | Y | 20 | Select |
-| Trạng thái yêu cầu | O | List | Y | 20 | Select |
-| Người xử lý | O | List | Y | 20 | Select |
-| Ngày xác nhận | O | Date | Y | 20 | Input |
+**Bảng tìm kiếm yêu cầu:**
 
-**Yêu cầu xử lý:**
-- Tài sản được khóa trong suốt quá trình xử lý để tránh xung đột
-- Hệ thống tự động nhận diện thông tin kho từ [OMS](#3-stakeholders)
-- Bắt buộc nhập lý do khi từ chối yêu cầu
-- Tự động gửi thông báo và cập nhật tasklist cho các vai trò liên quan
+| Field name | M/O | Field type | Editable | Max length | Format |
+|------------|-----|------------|----------|------------|--------|
+| Số yêu cầu | O | Text | Y | 20 | |
+| Ngày tạo | O | Date | Y | 20 | |
+| Tiêu đề | O | Text | Y | 150 | |
+| Người tạo | O | List | Y | 20 | |
+| Trạng thái yêu cầu | O | List | Y | 20 | |
+| Người xử lý | O | List | Y | 20 | |
+| Ngày xác nhận | O | Date | Y | 20 | |
 
-Sau khi được phê duyệt, yêu cầu điều chuyển kho sẽ kích hoạt [quy trình nhập kho](#421-create-warehouse-intake-request) tại kho đích.
+**Bảng thông tin chung yêu cầu:**
 
----
+| Field name | Operator | Action | M/O | Field type | Max length | Format | Default | Data rule |
+|------------|----------|--------|-----|------------|------------|--------|---------|-----------|
+| Số yêu cầu | System | Display | M | Text | 50 | CK.YY.xxxx | | YY = Year, xxxx = số chạy từ 1-9999 |
+| Ngày tạo | System | Display | M | Date | 50 | MM.DD.YYYY | Today | |
+| Tiêu đề | User | Input | O | Text | 150 | | | |
 
-### 4.3. Asset Enhancement Features
+Khi Approver phê duyệt yêu cầu, hệ thống tự động tạo biên bản điều chuyển, cập nhật thông tin kho của tài sản, thông báo cho các bên liên quan (AMP, WK kho đi, WK kho đến) và cập nhật tasklist tương ứng. Nếu từ chối, hệ thống unlock tài sản và thông báo cho người tạo yêu cầu.
 
-Các tính năng cải tiến cho module tài sản hiện tại bao gồm:
+### 4.5. Warehouse Export Module
 
-**Cải tiến Dashboard và Hiển thị:**
-- Dashboard tài sản với khả năng visualization và customization theo nhiều tiêu chí (được mô tả chi tiết trong [4.1. Asset Dashboard Module](#41-asset-dashboard-module))
-- Quản lý hiển thị tài sản vô hiệu hóa với tùy chọn ẩn/hiện khỏi danh sách
-- Đổi vị trí hiển thị một số cột trong danh sách tài sản để tối ưu trải nghiệm người dùng
+Module xuất kho xử lý các yêu cầu xuất tài sản từ kho, thường được kích hoạt tự động sau khi [yêu cầu cấp tài sản](#43-asset-provisioning-module) được phê duyệt. Module này đảm bảo quy trình xuất kho được kiểm soát chặt chẽ với workflow phê duyệt đa cấp.
 
-**Cải tiến Quy trình Cấp phát:**
-- Upload phiếu cấp tài sản hàng loạt theo danh sách để xử lý khối lượng lớn
-- Tự động xác nhận phiếu cấp tài sản sau 20 ngày không có phản hồi từ người dùng
-- Bổ sung luồng phê duyệt cho ATM trong module thanh lý
+#### 4.5.1. Thông số kỹ thuật giao diện người dùng
 
-**Tích hợp Hệ thống:**
-- Tự động đồng bộ [OMS](#3-stakeholders) khi orgchart thay đổi
-- Đồng bộ tiêu đề PO từ [EMS](#3-stakeholders) sang FAM
-- Cập nhật thông tin thời gian sử dụng và bảo hành từ [EMS](#3-stakeholders) dựa trên thời gian phê duyệt PO
+![Giao diện tạo yêu cầu xuất kho](images/5_4_1a_B5_image9.png)
 
-**Module Sửa chữa Tài sản (Mới):**
-- Tạo yêu cầu sửa chữa tài sản trên FAM
-- Tích hợp với hệ thống [ITSM](#3-stakeholders) để xử lý yêu cầu kỹ thuật
-- Kết nối với cổng hỗ trợ chi nhánh trên intranet
+Giao diện tạo yêu cầu xuất kho thường được kích hoạt tự động bởi hệ thống sau khi yêu cầu cấp tài sản được phê duyệt. Thông tin yêu cầu được kế thừa từ phiếu cấp tài sản gốc bao gồm danh sách tài sản, thông tin kho xuất và đầu mối nhận hàng.
 
----
+#### 4.5.2. Thông số kỹ thuật chi tiết
 
-## 5. Business Process Flows
+**Thông tin chung:**
 
-Hệ thống FAM Wave 4 hỗ trợ các quy trình nghiệp vụ chính sau:
+| Trường | Operator | Action | Loại | M/O | Editable | Max Length | Format | Default | Quy tắc |
+|--------|----------|--------|------|-----|----------|------------|---------|---------|---------|
+| Số yêu cầu | System | Display | Text | M | N | 50 | XK.YY.xxxx | | YY = Year, xxxx = số chạy từ 1-9999 |
+| Ngày tạo | System | Display | Date | M | N | 50 | MM.DD.YYYY | Today | |
+| Tiêu đề | System | Input | Text | O | Y | 150 | | | =Tiêu đề RQ Cấp/Thanh lý |
 
-**Quy trình Quản lý Kho:**
-- [Nhập kho tự động](#421-create-warehouse-intake-request) từ điều chuyển về kho
-- [Nhập kho thủ công](#424-manual-warehouse-entry) cho các trường hợp đặc biệt
-- [Xuất kho từ cấp tài sản](#426-asset-allocation-and-warehouse-exit) với quy trình phê duyệt đa cấp
-- [Điều chuyển giữa các kho](#428-inter-warehouse-transfer) nội bộ
+**Thông tin đầu mối nhận hàng:**
 
-**Tích hợp và Tự động hóa:**
-- Hệ thống tự động tạo yêu cầu xuất/nhập kho khi các quy trình upstream được phê duyệt
-- Cơ chế liên kết giữa các yêu cầu (hủy yêu cầu xuất kho sẽ tự động hủy yêu cầu cấp/thanh lý liên quan)
-- Đồng bộ dữ liệu với [OMS](#3-stakeholders) và [EMS](#3-stakeholders) để đảm bảo tính nhất quán
+| Operator | Action | Field name VN | M/O | Field type | Editable | Max length |
+|----------|--------|---------------|-----|------------|----------|------------|
+| User | Input | Đầu mối | M | Text | Y | 50 |
+| User | Input | Số điện thoại | M | Number | Y | 52 |
+| User | Input | Thời gian bàn giao | O | Date | Y | 50 |
 
-**Kiểm soát và Phê duyệt:**
-- Quy trình phê duyệt đa cấp với khả năng từ chối và yêu cầu bổ sung thông tin
-- Cơ chế lock/unlock tài sản để tránh xung đột dữ liệu
-- Ghi lại lịch sử xử lý đầy đủ cho mục đích audit
+Quy trình xuất kho bao gồm các bước: tiếp nhận yêu cầu từ Warehouse Keeper, [phê duyệt từ Warehouse Manager](#45-warehouse-export-module), và xác nhận nhận hàng từ BU User. Đối với yêu cầu xuất kho từ thanh lý, hệ thống sẽ ẩn nút "Từ chối" để đảm bảo quy trình thanh lý được thực hiện đầy đủ.
 
----
+## 5. System Integration Requirements
 
-## 6. System Status Management
+Hệ thống FAM Wave 4 tích hợp với nhiều hệ thống bên ngoài để đảm bảo đồng bộ dữ liệu và tối ưu hóa quy trình nghiệp vụ:
 
-Hệ thống quản lý trạng thái được thiết kế để theo dõi và kiểm soát vòng đời của từng yêu cầu và tài sản thông qua các trạng thái được định nghĩa rõ ràng.
+### 5.1. OMS Integration
 
-### Trạng thái Quy trình Cấp tài sản
+**Organization Management System (OMS)** cung cấp dữ liệu tổ chức quan trọng cho tất cả các module:
 
-**Cấp tài sản không ở kho (3 bước):**
+- Đồng bộ orgchart tự động khi có thay đổi cơ cấu tổ chức
+- Cung cấp thông tin kho bao gồm tên kho, địa chỉ và quản lý kho cho [module quản lý kho](#42-warehouse-management-module)
+- Cung cấp thông tin nhân sự và đơn vị sử dụng cho [dashboard tài sản](#41-asset-dashboard-module)
+- Hỗ trợ dữ liệu cho các quy trình [điều chuyển kho](#44-inter-warehouse-transfer-module)
+
+### 5.2. EMS Integration
+
+**Enterprise Management System (EMS)** đồng bộ thông tin liên quan đến Purchase Order:
+
+- Đồng bộ tiêu đề PO từ EMS sang FAM
+- Cập nhật thông tin thời gian từ EMS dựa trên thời gian PO được phê duyệt
+- Tự động cập nhật trường "Thông tin thời gian đưa vào sử dụng" và "Thời gian bắt đầu bảo hành" bằng thời gian PO được phê duyệt
+
+### 5.3. ITSM Integration
+
+**IT Service Management (ITSM)** sẽ được tích hợp trong tương lai cho module sửa chữa tài sản:
+
+- Tạo yêu cầu sửa chữa tài sản trên FAM và gửi link sang ITSM
+- Đồng bộ trạng thái xử lý từ ITSM về FAM
+- Tích hợp với Cổng hỗ trợ chi nhánh trên intranet
+
+## 6. Workflow & Status Management
+
+Hệ thống FAM Wave 4 được thiết kế với workflow phức tạp và quản lý trạng thái chặt chẽ để đảm bảo tính nhất quán và kiểm soát quy trình nghiệp vụ.
+
+### 6.1. Asset Provisioning Workflow
+
+Quy trình cấp tài sản có hai luồng chính:
+
+**Cấp tài sản không qua kho:**
 
 | Sub-process | PIC | Action | Rq Status | Asset Status | Note |
-|-------------|-----|---------|-----------|--------------|------|
+|-------------|-----|--------|-----------|--------------|------|
 | 1 Tạo yêu cầu | AMP | Lưu | Đang tạo | - | - |
-| | AMP | Gửi | Chờ xác nhận | - | - |
+| - | AMP | Gửi | Chờ xác nhận | - | - |
 | 2. Xác nhận | BU User | Từ chối | Từ chối | - | - |
-| | BU User | Xác nhận | Đã xác nhận | Đang sử dụng | Đã xác nhận >>> Đã nhận tài sản |
-| | BU User | Bổ sung thông tin | Bổ sung thông tin | - | - |
+| - | BU User | Xác nhận | Đã xác nhận | Đang sử dụng | Đã xác nhận >>> Đã nhận tài sản |
+| - | BU User | Bổ sung thông tin | Bổ sung thông tin | - | - |
 | 3. Bổ sung TT | AMP | Bổ sung thông tin | Chờ xác nhận | - | - |
 
-**Cấp tài sản từ kho (6 bước):**
+**Cấp tài sản từ kho:**
 
-| Sub-process | PIC | Action | Rq Status | Asset Status | Note |
-|-------------|-----|---------|-----------|--------------|------|
+| Sub-process | PIC | Action | Rq Status | Warehouse Status | Asset Status |
+|-------------|-----|--------|-----------|------------------|--------------|
 | 1. Tạo yêu cầu | AMP | Lưu | Đang tạo | - | - |
-| | AMP | Gửi | Chờ xác nhận | - | - |
+| - | AMP | Gửi | Chờ xác nhận | - | - |
 | 2. Phê duyệt | AM | Từ chối | Từ chối | - | - |
-| | AM | Duyệt | Đã xác nhận | - | - |
+| - | AM | Duyệt | Đã xác nhận | - | - |
 | 3. Tạo yêu cầu | System | - | Đã xác nhận | Chờ xuất kho | - |
 | 4. Xuất kho | WK | Từ chối | Từ chối | Từ chối | - |
-| | WK | Đồng ý | Đã xác nhận | Chờ phê duyệt | - |
+| - | WK | Đồng ý | Đã xác nhận | Chờ phê duyệt | - |
 | 5. Phê duyệt | Warehouse Mgr. | Từ chối | Từ chối | Từ chối | - |
-| | Warehouse Mgr. | Duyệt | Đã xác nhận | Chờ xác nhận | - |
+| - | Warehouse Mgr. | Duyệt | Đã xác nhận | Chờ xác nhận | - |
 | 6. Nhận hàng | BU User | Từ chối | Từ chối | Từ chối | - |
-| | BU User | Xác nhận | Đã xác nhận | Đã nhận tài sản | Đang sử dụng |
+| - | BU User | Xác nhận | Đã xác nhận | Đã nhận tài sản | Đang sử dụng |
 
-### Trạng thái Quy trình Thanh lý
+### 6.2. Tasklist Management
 
-**Thanh lý bán trực tiếp (8 bước):**
+Hệ thống quản lý tasklist đảm bảo phân công công việc rõ ràng và theo dõi tiến độ xử lý:
 
-| Sub-process | PIC | Action | Rq Status | Asset Status | Note |
-|-------------|-----|---------|-----------|--------------|------|
-| 1. Tạo yêu cầu | AMP | Lưu | Đang tạo | - | - |
-| | AMP | Gửi | Chờ kiểm soát | - | - |
-| 2. Kiểm soát | Checker | Từ chối | Từ chối | - | - |
-| | Checker | Yêu cầu bổ sung thông tin | Bổ sung thông tin | - | - |
-| | Checker | Duyệt | Chờ phê duyệt | - | - |
+| Sub-process | Hành động | Chi tiết | Vai trò | Điều chuyển - Cần xử lý | Điều chuyển - Đã xử lý | Kho - Cần xử lý | Kho - Đã xử lý | Ghi chú |
+|-------------|-----------|----------|---------|-------------------------|------------------------|-----------------|----------------|---------|
+| 2.3.1a Tạo yêu cầu điều chuyển | Lưu | | Initiator | x | | | | |
+| | Gửi | | | | x | | | |
+| 2.3.3a Phê duyệt yêu cầu điều chuyển | Từ chối | | Initiator | x | | | | |
+| | | | BUH | | x | | | |
+| | Duyệt | | Initiator | | x | | | |
+| | | | BUH | | x | | | |
+| | | | AMP | x | | | | |
+| | Bổ sung thông tin | | Initiator | x | | | | |
+| | | | BUH | | x | | | |
 
-Các trạng thái được thiết kế để đảm bảo:
-- Theo dõi được tiến trình xử lý của từng yêu cầu
-- Phân quyền rõ ràng cho từng bước xử lý
-- Đảm bảo tính nhất quán giữa trạng thái yêu cầu và trạng thái tài sản
-- Hỗ trợ rollback và xử lý exception khi cần thiết
+Hệ thống tự động cập nhật tasklist sau mỗi hành động để đảm bảo các bên liên quan được thông báo kịp thời và thực hiện công việc của mình.
 
----
-
-## 7. Task Assignment Matrix
-
-Ma trận phân công task định nghĩa rõ ràng ai làm gì, khi nào và task xuất hiện ở tasklist nào trong hệ thống. Hệ thống có hai loại tasklist chính:
-
-### Ma trận Phân công Task
-
-| Sub-process | Action | Role | Tasklist Điều chuyển - Cần xử lý | Tasklist Điều chuyển - Đã xử lý | Tasklist Kho - Cần xử lý | Tasklist Kho - Đã xử lý | Ghi chú |
-|------------|---------|------|:-------------------------------:|:------------------------------:|:------------------------:|:-----------------------:|---------|
-| 2.3.1a Tạo yêu cầu điều chuyển | Lưu | Initiator | x | | | | |
-| | Gửi | | | x | | | |
-| 2.3.3a Phê duyệt yêu cầu điều chuyển | Từ chối | Initiator | x | | | | |
-| | | BUH | | x | | | |
-| | Duyệt | Initiator | | x | | | |
-| | | BUH | | x | | | |
-| | | AMP | x | | | | |
-| | Bổ sung thông tin | Initiator | x | | | | |
-| | | BUH | | x | | | |
-| 5.2.2a Xác nhận yêu cầu điều chuyển | Từ chối | Initiator | x | | | | |
-| | | BUH | | x | | | |
-| | | AMP | | x | | | |
-| | Bổ sung thông tin | Initiator | x | | | | |
-| | | BUH | | x | | | |
-| | | AMP | | x | | | |
-| | Xác nhận & Yêu cầu nhập kho | Initiator | x | | | | |
-| | | BUH | | x | | | |
-| | | AMP | | x | x | | |
-| | | WM | | | x | | |
-
-### Quy tắc Tasklist
-
-**Tasklist Điều chuyển:**
-- Cần xử lý: Hiển thị các task đang chờ xử lý của user
-- Đã xử lý: Lưu trữ lịch sử các task đã hoàn thành
-
-**Tasklist Kho:**
-- Cần xử lý: Các yêu cầu liên quan đến kho chờ xử lý
-- Đã xử lý: Lịch sử xử lý các yêu cầu kho
-
-**Lưu ý quan trọng:** Có vấn đề về quy trình xử lý tại bước phê duyệt yêu cầu nhập kho cần được giải quyết trong quá trình phát triển.
-
----
-
-## 8. Assumptions & Constraints
+## 7. Assumptions & Constraints
 
 ### Giả định
 
-- Người dùng đã được đào tạo về quy trình nghiệp vụ hiện tại
-- Hệ thống [OMS](#3-stakeholders) và [EMS](#3-stakeholders) hoạt động ổn định và có API để tích hợp
-- Cơ sở hạ tầng IT đủ để hỗ trợ các tính năng mới
-- Dữ liệu hiện tại trong hệ thống FAM đã được làm sạch và chuẩn hóa
+- Hệ thống OMS và EMS hoạt động ổn định và cung cấp API đáng tin cậy
+- Người dùng đã được đào tạo về quy trình nghiệp vụ hiện tại và có thể thích ứng với các thay đổi
+- Hạ tầng IT hiện có đủ khả năng hỗ trợ các tính năng mới
+- Dữ liệu master về tài sản, kho và tổ chức đã được chuẩn hóa
 
 ### Ràng buộc
 
-- Không được thay đổi cấu trúc database hiện tại một cách đột ngột
-- Phải đảm bảo tương thích với các module FAM hiện tại
-- Thời gian phát triển bị giới hạn theo kế hoạch dự án
-- Ngân sách dự án đã được phê duyệt và không thể vượt quá
-- Phải tuân thủ các quy định về bảo mật và quyền riêng tư dữ liệu
+- Phải tuân thủ các quy định về kiểm toán và tuân thủ pháp luật hiện hành
+- Không được gián đoạn hoạt động nghiệp vụ hiện tại trong quá trình triển khai
+- Phải đảm bảo tính bảo mật thông tin theo tiêu chuẩn của tổ chức
+- Ngân sách và thời gian triển khai theo kế hoạch đã được phê duyệt
+- Module sửa chữa tài sản phụ thuộc vào việc làm rõ quy trình với bộ phận ITSM
 
-### Rủi ro
+## 8. Dependencies
 
-- Tích hợp với hệ thống bên ngoài có thể gặp khó khăn về kỹ thuật
-- Dữ liệu từ [OMS](#3-stakeholders)/[EMS](#3-stakeholders) có thể không nhất quán
-- Người dùng có thể cần thời gian để làm quen với giao diện mới
-- Hiệu năng hệ thống có thể bị ảnh hưởng với khối lượng dữ liệu lớn
+### Phụ thuộc nội bộ
 
----
+- [Dashboard tài sản](#41-asset-dashboard-module) phụ thuộc vào data từ tất cả các module khác
+- [Module quản lý kho](#42-warehouse-management-module) là nền tảng cho [module cấp tài sản](#43-asset-provisioning-module)
+- [Module điều chuyển kho](#44-inter-warehouse-transfer-module) phụ thuộc vào [quy trình nhập kho](#421-create-warehouse-intake-request)
 
-## 9. Dependencies
+### Phụ thuộc hệ thống bên ngoài
 
-### Phụ thuộc Hệ thống
+- OMS: Cung cấp dữ liệu orgchart, thông tin kho và nhân sự
+- EMS: Đồng bộ thông tin PO và thời gian
+- ITSM: Tích hợp module sửa chữa tài sản (tương lai)
+- Email system: Gửi thông báo tự động
 
-**Hệ thống OMS (Organization Management System):**
-- Cung cấp dữ liệu về cơ cấu tổ chức, thông tin kho
-- Hỗ trợ tự động đồng bộ khi orgchart thay đổi
-- API để lấy thông tin địa chỉ kho và quản lý kho
+### Phụ thuộc dữ liệu
 
-**Hệ thống EMS (Employee Management System):**
-- Cung cấp thông tin nhân viên và chức danh PO
-- Đồng bộ thông tin thời gian đưa vào sử dụng và bảo hành
-- Cập nhật dữ liệu tự động khi có thay đổi trong EMS
+- Dữ liệu tài sản hiện có phải được migrate và làm sạch
+- Master data về kho, đơn vị tổ chức phải được đồng bộ từ OMS
+- Quyền người dùng và vai trò phải được cấu hình đúng
 
-**Hệ thống ITSM:**
-- Hỗ trợ module sửa chữa tài sản
-- Xử lý các yêu cầu kỹ thuật từ FAM
-- Cung cấp trạng thái xử lý yêu cầu sửa chữa
+## 9. Acceptance Criteria
 
-### Phụ thuộc Quy trình
+### Tiêu chí chấp nhận chung
 
-- [Module dashboard](#41-asset-dashboard-module) phụ thuộc vào việc hoàn thành làm sạch dữ liệu
-- [Module kho](#42-warehouse-management-module) cần hoàn thành trước các tính năng cấp tài sản
-- Tích hợp OMS/EMS phải hoàn thành trước khi triển khai các tính năng tự động đồng bộ
-- Module sửa chữa phụ thuộc vào việc tích hợp thành công với ITSM
+- Tất cả các chức năng được mô tả trong [Business Requirements](#4-business-requirements) hoạt động đúng theo đặc tả
+- Hiệu năng hệ thống không giảm so với phiên bản hiện tại
+- Giao diện người dùng thân thiện và tuân thủ chuẩn UX của tổ chức
+- Hệ thống tích hợp thành công với OMS và EMS
 
-### Phụ thuộc Dữ liệu
+### Tiêu chí chấp nhận cụ thể
 
-- Dữ liệu master về kho và tài sản phải được chuẩn hóa
-- Thông tin phân quyền người dùng cần được cập nhật đầy đủ
-- Cấu hình workflow phải được thiết lập trước khi go-live
+**[Dashboard tài sản](#41-asset-dashboard-module):**
+- Hiển thị chính xác 4 KPI chính với dữ liệu real-time
+- 5 loại biểu đồ tương tác hoạt động mượt mà với hover và click events
+- Bộ lọc hoạt động chính xác và tốc độ phản hồi dưới 3 giây
+- Xuất Excel thành công với đầy đủ dữ liệu đã lọc
 
----
+**[Module quản lý kho](#42-warehouse-management-module):**
+- Tự động tạo yêu cầu nhập kho sau khi xác nhận điều chuyển về kho
+- Workflow phê duyệt 3 cấp hoạt động chính xác
+- Lock/unlock tài sản hoạt động đúng logic nghiệp vụ
+- Email notification gửi đúng người và đúng thời điểm
 
-## 10. Acceptance Criteria
+**[Module cấp tài sản](#43-asset-provisioning-module):**
+- Tự động tạo yêu cầu xuất kho sau khi AM phê duyệt
+- Quản lý trạng thái chính xác qua tất cả các bước
+- Đồng bộ thông tin với EMS về thời gian đưa vào sử dụng
 
-### Tiêu chí Chức năng
+**[Module điều chuyển kho](#44-inter-warehouse-transfer-module):**
+- Tạo yêu cầu điều chuyển với validation đầy đủ
+- Phê duyệt và tự động tạo biên bản điều chuyển
+- Cập nhật thông tin kho của tài sản sau khi hoàn thành
 
-**Dashboard Tài sản:**
-- [ ] Hiển thị đúng 4 thông số tổng quan như đã định nghĩa
-- [ ] Tất cả 5 loại biểu đồ hoạt động bình thường với dữ liệu thực
-- [ ] Bộ lọc hoạt động chính xác và hiển thị kết quả real-time
-- [ ] Tính năng export Excel hoạt động với dữ liệu được format đúng
-- [ ] Tương thác click-through đến các module liên quan hoạt động
+**Tích hợp hệ thống:**
+- Đồng bộ orgchart từ OMS hoạt động real-time
+- Đồng bộ thông tin PO từ EMS chính xác và kịp thời
+- Tasklist cập nhật chính xác cho tất cả các vai trò
 
-**Module Kho:**
-- [ ] Tất cả quy trình nhập/xuất kho hoạt động end-to-end
-- [ ] Cơ chế lock/unlock tài sản hoạt động chính xác
-- [ ] Tự động tạo số yêu cầu theo đúng format đã định nghĩa
-- [ ] Email notification gửi đúng người đúng thời điểm
-- [ ] Tasklist cập nhật chính xác theo ma trận đã định nghĩa
+**Hiệu năng và độ tin cậy:**
+- Thời gian phản hồi trung bình dưới 2 giây cho các thao tác thường dùng
+- Uptime đạt 99.9% trong giờ làm việc
+- Xử lý được đồng thời tối thiểu 100 concurrent users
+- Backup và recovery hoạt động chính xác theo quy trình
 
-**Tích hợp Hệ thống:**
-- [ ] Đồng bộ dữ liệu từ [OMS](#3-stakeholders) và [EMS](#3-stakeholders) thành công
-- [ ] Tự động cập nhật khi có thay đổi từ hệ thống bên ngoài
-- [ ] Xử lý lỗi gracefully khi hệ thống bên ngoài không khả dụng
-
-### Tiêu chí Phi chức năng
-
-**Hiệu năng:**
-- [ ] Thời gian response của dashboard < 3 giây với 1000 tài sản
-- [ ] Quy trình nhập/xuất kho hoàn thành trong < 30 giây
-- [ ] Hệ thống hỗ trợ đồng thời 50 người dùng
-
-**Bảo mật:**
-- [ ] Tất cả API calls được authenticate và authorize
-- [ ] Dữ liệu nhạy cảm được mã hóa trong database
-- [ ] Audit log ghi lại đầy đủ các thao tác quan trọng
-
-**Khả năng sử dụng:**
-- [ ] Giao diện trực quan, không cần training cho người dùng hiện tại
-- [ ] Hỗ trợ các trình duyệt phổ biến (Chrome, Edge, Firefox)
-- [ ] Responsive design hoạt động trên tablet
-
-**Độ tin cậy:**
-- [ ] Hệ thống có uptime > 99%
-- [ ] Có cơ chế backup và recovery cho dữ liệu quan trọng
-- [ ] Xử lý exception không làm crash toàn hệ thống
-
-### Tiêu chí User Acceptance
-
-- [ ] Người dùng có thể hoàn thành các tác vụ nghiệp vụ chính trong thời gian ngắn hơn so với hệ thống cũ
-- [ ] Báo cáo từ dashboard cung cấp insight hữu ích cho việc ra quyết định
-- [ ] Quy trình phê duyệt mới không tạo ra bottleneck so với quy trình cũ
-- [ ] Người dùng hài lòng với trải nghiệm sử dụng tổng thể (>80% positive feedback)
+Tài liệu này sẽ được review và cập nhật định kỳ theo tiến độ dự án và phản hồi từ các bên liên quan.
 
 ---
 
-## 11. Glossary
+*Generated by Claude Sonnet 4.5 from 37 sheet summaries*
+*Headings: 45 | Internal Links: 54*
 
-| Thuật ngữ | Định nghĩa |
-|-----------|------------|
-| **FAM** | Fixed Asset Management - Hệ thống quản lý tài sản cố định |
-| **AMP** | Asset Management Personnel - Nhân viên quản lý tài sản |
-| **AM** | Asset Manager - Quản lý tài sản |
-| **BU User** | Business Unit User - Người dùng đơn vị kinh doanh |
-| **BU Head** | Business Unit Head - Trưởng đơn vị kinh doanh |
-| **WK** | Warehouse Keeper - Thủ kho |
-| **WM** | Warehouse Manager - Quản lý kho |
-| **OMS** | Organization Management System - Hệ thống quản lý tổ chức |
-| **EMS** | Employee Management System - Hệ thống quản lý nhân sự |
-| **ITSM** | IT Service Management - Hệ thống quản lý dịch vụ IT |
-| **RQ** | Request - Yêu cầu |
-| **TS** | Tài sản |
-| **PO** | Purchase Order - Đơn hàng mua |
-| **CAT1** | Category 1 - Phân loại tài sản cấp 1 |
-| **NK.YY.xxxx** | Format số yêu cầu nhập kho (NK = Nhập Kho, YY = năm, xxxx = số thứ tự) |
-| **XK.YY.xxxx** | Format số yêu cầu xuất kho (XK = Xuất Kho, YY = năm, xxxx = số thứ tự) |
-| **CK.YY.xxxx** | Format số yêu cầu chuyển kho (CK = Chuyển Kho, YY = năm, xxxx = số thứ tự) |
-| **Lock Asset** | Khóa tài sản để tránh xung đột trong quá trình xử lý yêu cầu |
-| **Unlock Asset** | Mở khóa tài sản sau khi hoàn thành hoặc hủy yêu cầu |
-| **Tasklist** | Danh sách công việc cần xử lý của từng vai trò người dùng |
-| **Dashboard** | Bảng điều khiển hiển thị thông tin tổng quan |
-| **Visualization** | Trực quan hóa dữ liệu thông qua biểu đồ |
-| **Sunburst Chart** | Biểu đồ hình tròn phân cấp |
-| **Workflow** | Luồng công việc |
-| **Approver** | Người phê duyệt |
-| **Checker** | Người kiểm soát |
-| **Enhancement** | Cải tiến, nâng cấp tính năng hiện có |
-| **Integration** | Tích hợp hệ thống |
-| **API** | Application Programming Interface - Giao diện lập trình ứng dụng |
-
+*✅ All internal links validated successfully*
