@@ -232,7 +232,7 @@ Giao diện chi tiết yêu cầu hiển thị đầy đủ thông tin tài sả
 
 ### 4.5. Nhập kho từ quy trình điều chuyển về kho - Xác nhận
 
-![Giao diện xác nhận nhập kho](images/warehouse_confirmation.png)
+![Giao diện xác nhận nhập kho](images/5_1_3a_B5_images3.png)
 
 #### 4.5.1. Thông số kỹ thuật giao diện người dùng
 
