@@ -57,7 +57,7 @@ BRD là một **sản phẩm phái sinh** tổ chức và trình bày nội dung
 Mỗi bản tóm tắt chứa:
 1. Phân loại loại sheet (tổng-quan/quy-trình/giao-diện/đặc-tả/mô-hình-dữ-liệu/khác)
 2. **Mức độ chi tiết** (chi-tiết-cao / tổng-quan) - QUAN TRỌNG cho việc quyết định format
-3. Chủ đề/tiêu đề chính
+3. **Tên sheet gốc** - Tiêu đề chính xác từ Excel (có thể tiếng Anh hoặc tiếng Việt)
 4. Tóm tắt thông tin chính (2–3 đoạn)
 5. Các bên liên quan/vai trò được đề cập
 6. Các yêu cầu tìm thấy (nếu có)
@@ -138,7 +138,7 @@ Quy trình tạo yêu cầu nhập kho được khởi tạo tự động khi c�
 Một section có thể KẾT HỢP cả prose và tables:
 
 ```markdown
-### 4.2.1. Create Warehouse Intake Request
+### 4.2.1. Tạo Yêu Cầu Nhập Kho
 
 #### 4.2.1.1. Thông số kỹ thuật giao diện người dùng
 
@@ -171,28 +171,25 @@ Hệ thống áp dụng các quy tắc chuyển trạng thái sau:
 
 ## QUAN TRỌNG: Cấu trúc Section và Liên kết Nội bộ
 
-### Phương pháp: Section được Đánh số với Tiêu đề viết bằng Nội dung tiếng Việt
+### Phương pháp: GIỮ NGUYÊN TÊN SHEET GỐC
 
-Sử dụng **tiêu đề section được đánh số bằng tiếng Anh** với **toàn bộ nội dung bằng tiếng Việt**. Markdown chuẩn tự động tạo anchor từ văn bản heading.
+**NGUYÊN TẮC CHÍNH:** Tiêu đề section PHẢI giữ nguyên y hệt tên sheet trong Excel gốc - có thể là tiếng Anh, tiếng Việt, hoặc kết hợp cả hai. KHÔNG dịch, KHÔNG thay đổi.
 
-```markdown
-### 4.1. Asset Dashboard Module
-
-Module này cung cấp bảng điều khiển tổng quan về tài sản...
-```
-
-Điều này tự động tạo anchor `#41-asset-dashboard-module` có thể liên kết đến.
+**Ví dụ:**
+- Nếu sheet tên "Create Warehouse Intake Request" → header: `### 4.2.1. Create Warehouse Intake Request`
+- Nếu sheet tên "Tạo Yêu Cầu Nhập Kho" → header: `### 4.2.1. Tạo Yêu Cầu Nhập Kho`
+- Nếu sheet tên "Asset Dashboard - Bảng Điều Khiển" → header: `### 4.1. Asset Dashboard - Bảng Điều Khiển`
 
 ### Quy tắc cho Header Section
 
-1. **Chỉ tiêu đề section Cấp 1 viết bằng tiếng Anh** với định dạng đánh số (ví dụ: 1., 2., 3.). 
-2. **Tất cả nội dung còn lại trong section phải bằng tiếng Việt**
+1. **Tiêu đề section = Tên sheet gốc** (giữ nguyên ngôn ngữ từ Excel)
+2. **Thêm số thứ tự** trước tiêu đề (1., 2.1., 4.2.3., v.v.)
 3. **Giữ header sạch sẽ** - không có cú pháp `{#id}` hoặc tham chiếu sheet
-4. **Đối với các sheet liên quan (ví dụ: 5.1.1a UI + 5.1.1b Specs)**, kết hợp thành MỘT section được đánh số
+4. **Đối với các sheet liên quan (ví dụ: 5.1.1a UI + 5.1.1b Specs)**, kết hợp thành MỘT section với tên từ sheet chính
 
 ### Quy ước Đánh số
 
-- **Cấp 1:** 1., 2., 3., 4., v.v. (ví dụ: "1. Executive Summary")
+- **Cấp 1:** 1., 2., 3., 4., v.v. (ví dụ: "1. Executive Summary" hoặc "1. Tóm Tắt Điều Hành")
 - **Cấp 2:** 1.1., 1.2., 2.1., 2.2., v.v. (ví dụ: "4.1. Asset Dashboard Module")
 - **Cấp 3:** 1.1.1., 1.1.2., 2.1.1., v.v. (ví dụ: "4.2.1. Create Warehouse Intake Request")
 - **Cấp 4:** 1.1.1.1., 1.1.1.2., v.v. (nếu cần cho các tiểu mục chi tiết)
@@ -203,15 +200,22 @@ Sử dụng **anchor dựa trên tiêu đề** được suy ra từ heading sect
 - Chuyển thành chữ thường
 - Thay khoảng trắng bằng dấu gạch ngang
 - Loại bỏ ký tự đặc biệt và dấu chấm
+- **Giữ nguyên ký tự tiếng Việt** (dấu sẽ bị loại bỏ trong một số renderer)
 
 **Ví dụ:**
 - `### 1. Executive Summary` → anchor: `#1-executive-summary`
 - `### 4.1. Asset Dashboard Module` → anchor: `#41-asset-dashboard-module`
 - `### 4.2.1. Create Warehouse Intake Request` → anchor: `#421-create-warehouse-intake-request`
+- `### 4.2.1. Tạo Yêu Cầu Nhập Kho` → anchor: `#421-tạo-yêu-cầu-nhập-kho`
 
-**Định dạng liên kết (văn bản tiếng Việt với anchor):**
+**Định dạng liên kết:**
 ```markdown
 Xem phần [4.2.1. Create Warehouse Intake Request](#421-create-warehouse-intake-request) để biết thêm chi tiết.
+```
+
+Hoặc nếu tên gốc tiếng Việt:
+```markdown
+Xem phần [4.2.1. Tạo Yêu Cầu Nhập Kho](#421-tạo-yêu-cầu-nhập-kho) để biết thêm chi tiết.
 ```
 
 **KHÔNG BAO GIỜ sử dụng:**
@@ -346,53 +350,75 @@ Nếu bản tóm tắt sheet đề cập đến file hình ảnh, bạn PHẢI b
 
 ## Cách Xử lý các Cặp Sheet
 
-Kết hợp các sheet thành cặp thành **một section được đánh số với hai tiểu mục**:
+Kết hợp các sheet thành cặp thành **một section được đánh số với hai tiểu mục**, sử dụng **tên sheet gốc** làm tiêu đề chính:
 
 ```markdown
-### 4.2.1. [Tiêu đề từ các sheet]
+### 4.2.1. [TÊN SHEET GỐC - giữ nguyên ngôn ngữ]
 
 #### 4.2.1.1. Thông số kỹ thuật giao diện người dùng
-[Nội dung tiếng Việt từ sheet "a" - quy trình, giao diện người dùng, tương tác các bên liên quan]
+[Nội dung từ sheet "a" - quy trình, giao diện người dùng, tương tác các bên liên quan]
 [Thường là PROSE vì mô tả flow]
 
 #### 4.2.1.2. Thông số kỹ thuật chi tiết
-[Nội dung tiếng Việt từ sheet "b" - yêu cầu trường, quy tắc validation, hành vi hệ thống]
+[Nội dung từ sheet "b" - yêu cầu trường, quy tắc validation, hành vi hệ thống]
 [Thường có TABLES vì chi tiết specs]
+```
+
+**Ví dụ với tên tiếng Anh:**
+```markdown
+### 4.2.1. Create Warehouse Intake Request
+
+#### 4.2.1.1. Thông số kỹ thuật giao diện người dùng
+...
+
+#### 4.2.1.2. Thông số kỹ thuật chi tiết
+...
+```
+
+**Ví dụ với tên tiếng Việt:**
+```markdown
+### 4.2.1. Tạo Yêu Cầu Nhập Kho
+
+#### 4.2.1.1. Thông số kỹ thuật giao diện người dùng
+...
+
+#### 4.2.1.2. Thông số kỹ thuật chi tiết
+...
 ```
 
 ---
 
 ## Cấu trúc Đầu ra BRD
 
-Tổ chức nội dung tổng hợp theo cấu trúc được đánh số này:
+Tổ chức nội dung tổng hợp theo cấu trúc được đánh số này. **Các section cố định** (1-4, 6-9) giữ nguyên tiêu đề tiếng Anh. **Section 5 (Business Requirements)** sử dụng tên sheet gốc.
 
-### 1. Mục lục
+### 1. Table of Contents
    - Liệt kê tất cả các section chính với liên kết nội bộ và số thứ tự
    
-### 2. Executive Summary (Nội dung tiếng Việt)
+### 2. Executive Summary
    - Tổng quan dự án cấp cao
    - Các sản phẩm chính
    
-### 3. Project Scope & Objectives (Nội dung tiếng Việt)
+### 3. Project Scope & Objectives
    - Trong phạm vi / Ngoài phạm vi
    - Mục tiêu dự án
    
-### 4. Stakeholders (Nội dung tiếng Việt)
+### 4. Stakeholders
    - Danh sách hợp nhất tất cả các vai trò
    
-### 5. Business Requirements (Nội dung tiếng Việt)
+### 5. Business Requirements
    - **Tổ chức theo chủ đề logic**
-   - Mỗi sheet trở thành tiểu mục với đầy đủ chi tiết
+   - **Tiêu đề mỗi tiểu mục = Tên sheet gốc** (giữ nguyên tiếng Anh hoặc tiếng Việt)
    - **GIỮ NGUYÊN TABLES** từ bản tóm tắt khi có
-   - Sử dụng đánh số: 4.1., 4.2., 4.2.1., v.v.
+   - Sử dụng đánh số: 5.1., 5.2., 5.2.1., v.v.
    
-### 6. Assumptions & Constraints (Nội dung tiếng Việt)
+### 6. Assumptions & Constraints
 
-### 7. Dependencies (Nội dung tiếng Việt)
+### 7. Dependencies
 
-### 8. Acceptance Criteria (Nội dung tiếng Việt)
+### 8. Acceptance Criteria
 
-### 9. Glossary (Nội dung tiếng Việt)
+### 9. Glossary
 
 ---
 
@@ -400,9 +426,9 @@ Tổ chức nội dung tổng hợp theo cấu trúc được đánh số này:
 
 Trước khi hoàn thành phản hồi, xác minh:
 
-1. ✅ Mọi section có đánh số đúng (1., 2.1., 4.2.3., v.v.)
-2. ✅ Tất cả tiêu đề section bằng tiếng Anh
-3. ✅ Tất cả nội dung trong section bằng tiếng Việt
+1. ✅ Mọi section có đánh số đúng (1., 2.1., 5.2.3., v.v.)
+2. ✅ **Tiêu đề section Business Requirements = Tên sheet gốc** (giữ nguyên ngôn ngữ)
+3. ✅ Các section cố định (1-4, 6-9) giữ tiêu đề tiếng Anh
 4. ✅ **TABLES được giữ nguyên** cho sheets có mức độ chi tiết = `chi-tiết-cao`
 5. ✅ **PROSE được sử dụng** cho sheets có mức độ chi tiết = `tổng-quan`
 6. ✅ Tất cả liên kết nội bộ sử dụng anchor đúng
@@ -419,8 +445,8 @@ USER_PROMPT_TEMPLATE = """Dưới đây là các bản tóm tắt của {num_she
 Vui lòng tổng hợp những bản tóm tắt này thành một Tài liệu Yêu cầu Nghiệp vụ toàn diện theo hướng dẫn của bạn.
 
 **LƯU Ý QUAN TRỌNG:**
-1. Sử dụng header section Cấp 1 ĐƯỢC ĐÁNH SỐ với tiêu đề tiếng Anh
-2. Viết TẤT CẢ nội dung và headers còn lại bằng tiếng Việt
+1. **GIỮ NGUYÊN TÊN SHEET GỐC** làm tiêu đề section (tiếng Anh hoặc tiếng Việt - KHÔNG dịch)
+2. Thêm số thứ tự trước tiêu đề (1., 2.1., 5.2.3., v.v.)
 3. Kết hợp các sheet thành cặp (a/b) thành section duy nhất
 4. **GIỮ NGUYÊN MARKDOWN TABLES** từ bản tóm tắt cho các sheet có mức độ chi tiết = `chi-tiết-cao`
 5. **DÙNG PROSE** cho các sheet có mức độ chi tiết = `tổng-quan`
@@ -436,7 +462,7 @@ Vui lòng tổng hợp những bản tóm tắt này thành một Tài liệu Y�
 
 ---
 
-Vui lòng cung cấp BRD hoàn chỉnh ở định dạng Markdown với tiêu đề cấp 1 tiếng Anh được đánh số, nội dung còn lại tiếng Việt, tables được giữ nguyên khi cần, và tham chiếu chéo nội bộ phong phú.
+Vui lòng cung cấp BRD hoàn chỉnh ở định dạng Markdown với tiêu đề section giữ nguyên từ tên sheet gốc, tables được giữ nguyên khi cần, và tham chiếu chéo nội bộ phong phú.
 """
 
 
