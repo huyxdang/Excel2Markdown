@@ -23,6 +23,7 @@ Output:
 
 import sys
 import os
+import re
 import glob
 import argparse
 from pathlib import Path
@@ -70,25 +71,23 @@ Mỗi bản tóm tắt chứa:
 
 ## QUAN TRỌNG NHẤT: Quy tắc Nhúng Hình ảnh
 
-### NGUỒN DUY NHẤT CHO ĐƯỜNG DẪN HÌNH ẢNH
+### SỬ DỤNG PLACEHOLDER TOKEN
 
-**CHỈ sử dụng đường dẫn hình ảnh từ "Section 10: Danh sách hình ảnh (trích xuất tự động)".**
+**Khi muốn nhúng hình ảnh, CHỈ viết token `<<IMAGE:filename>>`.**
 
-Section 10 được tạo bởi code programmatically và LUÔN CHÍNH XÁC.
-Section 9 (Hình ảnh trong sheet) có thể KHÔNG chính xác - KHÔNG sử dụng.
+KHÔNG viết cú pháp markdown `![...](images/...)`. Hệ thống sẽ tự động chuyển đổi token thành markdown sau.
 
 ### QUY TẮC TUYỆT ĐỐI
 
-1. **COPY-PASTE CHÍNH XÁC** từ Section 10
-   - Nếu Section 10 ghi: `![5.2.1a_B5](images/5_2_1a_B5_image1.png)`
-   - Thì BRD phải ghi: `![5.2.1a_B5](images/5_2_1a_B5_image1.png)`
+1. **COPY-PASTE CHÍNH XÁC tên file từ Section 10**
+   - Nếu Section 10 ghi: `<<IMAGE:5_2_1a_B5_image1.png>>`
+   - Thì BRD phải ghi: `<<IMAGE:5_2_1a_B5_image1.png>>`
    
 2. **KHÔNG BAO GIỜ:**
-   - Tự đặt tên file như `images/warehouse_confirmation.png`
+   - Viết cú pháp markdown `![...](...)`
+   - Tự đặt tên file như `warehouse_confirmation.png`
    - Thay đổi underscore `_` thành dot `.`
-   - Thay đổi dot `.` thành underscore `_`
    - Đoán hoặc suy luận tên file
-   - Sử dụng thông tin từ Section 9
 
 3. **NẾU KHÔNG TÌM THẤY Section 10:**
    - Kiểm tra lại bản tóm tắt
@@ -98,10 +97,8 @@ Section 9 (Hình ảnh trong sheet) có thể KHÔNG chính xác - KHÔNG sử d
 
 | Trong Section 10 | ✅ ĐÚNG | ❌ SAI |
 |------------------|---------|--------|
-| `![5.2.1a_B5](images/5_2_1a_B5_image1.png)` | `![Giao diện nhập kho](images/5_2_1a_B5_image1.png)` | `![Giao diện](images/5.2.1a_B5_image1.png)` |
-| `![5_1_3a_B5](images/5_1_3a_B5_image2.png)` | `![Màn hình xác nhận](images/5_1_3a_B5_image2.png)` | `![Màn hình](images/warehouse_confirm.png)` |
-
-**LƯU Ý:** Bạn CÓ THỂ thay đổi phần mô tả `![...]` nhưng KHÔNG ĐƯỢC thay đổi phần đường dẫn `(images/...)`.
+| `<<IMAGE:5_2_1a_B5_image1.png>>` | `<<IMAGE:5_2_1a_B5_image1.png>>` | `![Giao diện](images/5_2_1a_B5_image1.png)` |
+| `<<IMAGE:5_1_3a_B5_image2.png>>` | `<<IMAGE:5_1_3a_B5_image2.png>>` | `<<IMAGE:5.1.3a_B5_image2.png>>` |
 
 ---
 
@@ -368,7 +365,7 @@ Nếu bản tóm tắt có mô tả các bước thực hiện (workflow steps) 
 ```markdown
 #### 4.2.1.1. Thông số kỹ thuật giao diện người dùng
 
-![Giao diện tạo yêu cầu nhập kho](images/5_1_1a_B5_image1.png)
+<<IMAGE:5_1_1a_B5_image1.png>>
 
 **Các bước thực hiện:**
 1. Người dùng chọn loại nhập kho từ dropdown
@@ -388,12 +385,12 @@ Quy trình này xử lý việc tạo yêu cầu nhập kho tự động...
 
 3. **Nhiều hình ảnh trong một sheet**: Đặt theo thứ tự cell (B5 trước C10, v.v.), mỗi hình ảnh có các bước riêng (nếu có)
 
-4. **Mô tả hình ảnh**: Có thể viết tiếng Việt mô tả nội dung, nhưng KHÔNG thay đổi đường dẫn
+4. **Chỉ sử dụng token**: Viết `<<IMAGE:filename.png>>`, KHÔNG viết markdown
 
 ### Cấu trúc Image + Steps
 
 ```markdown
-![Mô tả hình ảnh](images/exact_path_from_section_10.png)
+<<IMAGE:exact_filename_from_section_10.png>>
 
 **Các bước thực hiện:**
 1. Bước 1
@@ -417,7 +414,7 @@ Kết hợp các sheet thành cặp thành **một section được đánh số 
 ### 4.2.1. [TÊN SHEET GỐC - giữ nguyên ngôn ngữ]
 
 #### 4.2.1.1. Thông số kỹ thuật giao diện người dùng
-[HÌNH ẢNH từ Section 10 của sheet "a"]
+[IMAGE TOKEN từ Section 10 của sheet "a"]
 [CÁC BƯỚC THỰC HIỆN ngay sau hình ảnh]
 [CÁC THÀNH PHẦN GIAO DIỆN]
 [Nội dung từ sheet "a" - quy trình, giao diện người dùng, tương tác các bên liên quan]
@@ -433,7 +430,7 @@ Kết hợp các sheet thành cặp thành **một section được đánh số 
 
 #### 4.2.1.1. Thông số kỹ thuật giao diện người dùng
 
-![Giao diện tạo yêu cầu](images/5_1_1a_B5_image1.png)
+<<IMAGE:5_1_1a_B5_image1.png>>
 
 **Các bước thực hiện:**
 1. Người dùng truy cập màn hình Quản lý kho
@@ -511,8 +508,8 @@ Trước khi hoàn thành phản hồi, xác minh:
 8. ✅ Nội dung đầy đủ được bảo toàn
 9. ✅ Section cha liên kết đến các section con
 10. ✅ Có ít nhất 20+ liên kết nội bộ
-11. ✅ **TẤT CẢ hình ảnh từ Section 10 được nhúng**
-12. ✅ **ĐƯỜNG DẪN HÌNH ẢNH CHÍNH XÁC 100%** - copy từ Section 10, KHÔNG tự đặt tên
+11. ✅ **TẤT CẢ hình ảnh từ Section 10 được nhúng bằng TOKEN**
+12. ✅ **CHỈ sử dụng cú pháp `<<IMAGE:filename.png>>`** - KHÔNG dùng markdown image
 """
 
 
@@ -522,13 +519,12 @@ Vui lòng tổng hợp những bản tóm tắt này thành một Tài liệu Y�
 
 **LƯU Ý QUAN TRỌNG VỀ HÌNH ẢNH:**
 
-⚠️ **CHỈ sử dụng đường dẫn hình ảnh từ "Section 10: Danh sách hình ảnh (trích xuất tự động)"**
+⚠️ **SỬ DỤNG TOKEN `<<IMAGE:filename>>` - KHÔNG dùng markdown image syntax**
 
-- Section 10 được tạo bởi code và LUÔN CHÍNH XÁC
-- Section 9 có thể KHÔNG chính xác - KHÔNG sử dụng
-- Copy-paste CHÍNH XÁC đường dẫn từ Section 10
-- KHÔNG thay đổi bất kỳ ký tự nào trong đường dẫn (underscore, dot, số, v.v.)
-- KHÔNG tự đặt tên file mô tả như `warehouse_confirmation.png`
+- Khi muốn nhúng hình ảnh, viết: `<<IMAGE:5_2_1a_B5_image1.png>>`
+- KHÔNG viết: `![...](images/...)`
+- Copy CHÍNH XÁC tên file từ Section 10
+- Hệ thống sẽ tự động chuyển token thành markdown sau
 
 **CÁC LƯU Ý KHÁC:**
 1. **GIỮ NGUYÊN TÊN SHEET GỐC** làm tiêu đề section (tiếng Anh hoặc tiếng Việt - KHÔNG dịch)
@@ -551,7 +547,7 @@ Vui lòng cung cấp BRD hoàn chỉnh ở định dạng Markdown với:
 - Tiêu đề section giữ nguyên từ tên sheet gốc
 - Tables được giữ nguyên khi cần
 - Tham chiếu chéo nội bộ phong phú
-- **Đường dẫn hình ảnh CHÍNH XÁC 100% từ Section 10**
+- **Hình ảnh sử dụng TOKEN `<<IMAGE:filename>>`**
 """
 
 def load_all_summaries(summaries_dir: str) -> dict:
@@ -681,42 +677,109 @@ def validate_brd_anchors(brd_content: str, sheet_ids: list) -> dict:
 
 def validate_image_paths(brd_content: str, summaries: dict) -> dict:
     """
-    Validate that image paths in BRD match those in Section 10 of summaries.
+    Validate that image tokens in BRD match those in Section 10 of summaries.
     
     Returns:
         Dictionary with validation results
     """
     import re
     
-    # Extract all image paths from Section 10 of all summaries
-    valid_paths = set()
+    # Extract all valid image filenames from Section 10 of all summaries
+    valid_filenames = set()
     section_10_pattern = r'## 10\. Danh sách hình ảnh.*?(?=\n## |\n---|\Z)'
-    image_pattern = r'!\[[^\]]*\]\((images/[^)]+)\)'
+    token_pattern = r'<<IMAGE:([^>]+)>>'
     
     for sheet_name, summary in summaries.items():
         # Find Section 10
         section_match = re.search(section_10_pattern, summary, re.DOTALL)
         if section_match:
             section_content = section_match.group(0)
-            # Extract image paths from Section 10
-            for match in re.finditer(image_pattern, section_content):
-                valid_paths.add(match.group(1))
+            # Extract filenames from tokens in Section 10
+            for match in re.finditer(token_pattern, section_content):
+                valid_filenames.add(match.group(1))
     
-    # Extract all image paths used in BRD
-    brd_images = re.findall(image_pattern, brd_content)
+    # Extract all image tokens used in BRD
+    brd_tokens = re.findall(token_pattern, brd_content)
     
-    # Check for invalid paths
-    invalid_paths = []
-    for path in brd_images:
-        if path not in valid_paths:
-            invalid_paths.append(path)
+    # Also check for any markdown image syntax (should not exist)
+    markdown_images = re.findall(r'!\[[^\]]*\]\(images/([^)]+)\)', brd_content)
+    
+    # Check for invalid tokens
+    invalid_tokens = []
+    for token in brd_tokens:
+        if token not in valid_filenames:
+            invalid_tokens.append(token)
     
     return {
-        'valid_paths': list(valid_paths),
-        'brd_images': brd_images,
-        'invalid_paths': invalid_paths,
-        'missing_images': list(valid_paths - set(brd_images))
+        'valid_filenames': list(valid_filenames),
+        'brd_tokens': brd_tokens,
+        'invalid_tokens': invalid_tokens,
+        'missing_images': list(valid_filenames - set(brd_tokens)),
+        'markdown_images_found': markdown_images  # Should be empty
     }
+
+
+def convert_image_tokens(brd_content: str, valid_filenames: set) -> tuple:
+    """
+    Convert <<IMAGE:filename>> tokens to proper markdown image syntax.
+    
+    Also handles:
+    - Invalid tokens (not in valid_filenames) are removed with a warning comment
+    - Missing images are appended to an appendix
+    
+    Returns:
+        Tuple of (converted_content, conversion_stats)
+    """
+    import re
+    
+    stats = {
+        'converted': 0,
+        'invalid_removed': 0,
+        'invalid_list': []
+    }
+    
+    def replace_token(match):
+        filename = match.group(1)
+        if filename in valid_filenames:
+            stats['converted'] += 1
+            # Generate a description from filename
+            # 5_2_1a_B5_image1.png -> "5.2.1a B5"
+            desc = filename.replace('_', '.').replace('.png', '').replace('.jpg', '').replace('.jpeg', '')
+            # Clean up: 5.2.1a.B5.image1 -> 5.2.1a B5
+            parts = desc.split('.')
+            if len(parts) >= 2:
+                desc = f"{'.'.join(parts[:-2])} {parts[-2]}" if len(parts) > 2 else desc
+            return f"![{desc}](images/{filename})"
+        else:
+            stats['invalid_removed'] += 1
+            stats['invalid_list'].append(filename)
+            return f"<!-- Invalid image token removed: {filename} -->"
+    
+    converted = re.sub(r'<<IMAGE:([^>]+)>>', replace_token, brd_content)
+    
+    return converted, stats
+
+
+def append_missing_images(brd_content: str, missing_images: list) -> str:
+    """
+    Append missing images to the end of the BRD in an appendix section.
+    """
+    if not missing_images:
+        return brd_content
+    
+    appendix = "\n\n---\n\n## Phụ lục: Hình ảnh bổ sung\n\n"
+    appendix += "Các hình ảnh sau được trích xuất từ tài liệu gốc nhưng chưa được đặt vào nội dung chính:\n\n"
+    
+    for filename in missing_images:
+        desc = filename.replace('_', ' ').replace('.png', '').replace('.jpg', '')
+        appendix += f"![{desc}](images/{filename})\n\n"
+    
+    # Insert before the final metadata section if it exists
+    if "\n---\n\n*Generated by Claude" in brd_content:
+        parts = brd_content.rsplit("\n---\n\n*Generated by Claude", 1)
+        return parts[0] + appendix + "\n---\n\n*Generated by Claude" + parts[1]
+    else:
+        return brd_content + appendix
 
 
 def synthesize_brd(client: Anthropic, summaries: dict, max_tokens: int = 32000) -> str:
@@ -794,22 +857,42 @@ def synthesize_brd(client: Anthropic, summaries: dict, max_tokens: int = 32000) 
             else:
                 print(f"  ✅ All broken links fixed!")
         
-        # Validate image paths
-        print("\nValidating image paths...")
+        # Validate image tokens
+        print("\nValidating image tokens...")
         image_validation = validate_image_paths(brd_content, summaries)
-        print(f"  Valid paths from Section 10: {len(image_validation['valid_paths'])}")
-        print(f"  Images in BRD: {len(image_validation['brd_images'])}")
+        print(f"  Valid filenames from Section 10: {len(image_validation['valid_filenames'])}")
+        print(f"  Image tokens in BRD: {len(image_validation['brd_tokens'])}")
         
-        if image_validation['invalid_paths']:
-            print(f"  ⚠️  Invalid/hallucinated paths: {image_validation['invalid_paths']}")
+        if image_validation['markdown_images_found']:
+            print(f"  ⚠️  Found markdown image syntax (should use tokens): {image_validation['markdown_images_found'][:5]}")
+        
+        if image_validation['invalid_tokens']:
+            print(f"  ⚠️  Invalid tokens (will be removed): {image_validation['invalid_tokens']}")
+        
         if image_validation['missing_images']:
-            print(f"  ⚠️  Missing images (in Section 10 but not in BRD): {image_validation['missing_images'][:10]}")
-        if not image_validation['invalid_paths'] and not image_validation['missing_images']:
-            print(f"  ✅ All image paths valid!")
+            print(f"  ⚠️  Missing images (will be added to appendix): {image_validation['missing_images'][:10]}")
+        
+        # Convert image tokens to markdown
+        print("\nConverting image tokens to markdown...")
+        valid_filenames_set = set(image_validation['valid_filenames'])
+        brd_content, conversion_stats = convert_image_tokens(brd_content, valid_filenames_set)
+        print(f"  ✅ Converted {conversion_stats['converted']} tokens")
+        if conversion_stats['invalid_removed'] > 0:
+            print(f"  ⚠️  Removed {conversion_stats['invalid_removed']} invalid tokens: {conversion_stats['invalid_list']}")
+        
+        # Append missing images
+        if image_validation['missing_images']:
+            print(f"\nAppending {len(image_validation['missing_images'])} missing images to appendix...")
+            brd_content = append_missing_images(brd_content, image_validation['missing_images'])
+            print(f"  ✅ Added appendix with missing images")
+        
+        # Final image count
+        final_image_count = len(re.findall(r'!\[[^\]]*\]\(images/[^)]+\)', brd_content))
+        print(f"\n📊 Final image count: {final_image_count}")
         
         # Add generation metadata at the end
         metadata = f"\n\n---\n\n*Generated by Claude Sonnet 4.5 from {len(summaries)} sheet summaries*\n"
-        metadata += f"*Headings: {len(validation['headings_found'])} | Internal Links: {len(validation['links_found'])} | Images: {len(image_validation['brd_images'])}*\n"
+        metadata += f"*Headings: {len(validation['headings_found'])} | Internal Links: {len(validation['links_found'])} | Images: {final_image_count}*\n"
         
         # Check final validation state
         final_validation = validate_brd_anchors(brd_content, sheet_ids)
@@ -818,12 +901,10 @@ def synthesize_brd(client: Anthropic, summaries: dict, max_tokens: int = 32000) 
         else:
             metadata += f"\n*✅ All internal links validated successfully*\n"
         
-        if image_validation['invalid_paths']:
-            metadata += f"*⚠️ Image path warnings - {len(image_validation['invalid_paths'])} paths may be incorrect*\n"
-        elif image_validation['missing_images']:
-            metadata += f"*⚠️ {len(image_validation['missing_images'])} images from summaries not included in BRD*\n"
+        if conversion_stats['invalid_removed'] > 0:
+            metadata += f"*⚠️ {conversion_stats['invalid_removed']} invalid image tokens were removed*\n"
         else:
-            metadata += f"*✅ All image paths validated successfully*\n"
+            metadata += f"*✅ All image tokens converted successfully*\n"
         
         brd_content += metadata
         

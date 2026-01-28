@@ -7,13 +7,12 @@ structured markdown summaries suitable for BRD synthesis.
 Uses parallel API calls for faster processing.
 
 Usage:
-    python summarize_sheets.py <sheets_dir> <output_dir> --images-dir <images_dir> [--api-key KEY] [--workers N]
+    python summarize_sheets.py <sheets_dir> <output_dir> [--api-key KEY] [--workers N]
 
 Example:
     python summarize_sheets.py output/sheets output/summaries
     python summarize_sheets.py output/sheets output/summaries --api-key sk-ant-...
     python summarize_sheets.py output/sheets output/summaries --workers 10
-    python summarize_sheets.py output/sheets output/summaries --workers 5 --images-dir output/images
     
 Environment:
     ANTHROPIC_API_KEY - API key for Claude (loaded from .env file or environment)
@@ -93,17 +92,17 @@ Vui lòng đưa ra:
    | ma_yeu_cau | VARCHAR      | 50     | Có       | Mã yêu cầu theo format NK.YY.xxxx |
    ```
 
-9. **Hình ảnh trong sheet** (QUAN TRỌNG - GIỮ NGUYÊN CHÍNH XÁC):
+9. **Hình ảnh trong sheet** (QUAN TRỌNG - SỬ DỤNG TOKEN):
    Tìm TẤT CẢ các tham chiếu hình ảnh trong sheet (có dạng `![...](images/...)`).
-   Liệt kê CHÍNH XÁC từng tham chiếu, KHÔNG thay đổi bất kỳ ký tự nào.
+   Trích xuất TÊN FILE và liệt kê dưới dạng token.
    
    Ví dụ nếu trong CSV có: `B5: ![5.2.1a_B5](images/5_2_1a_B5_image1.png)`
    Thì ghi:
    ```
-   - Cell B5: `![5.2.1a_B5](images/5_2_1a_B5_image1.png)`
+   - Cell B5: `<<IMAGE:5_2_1a_B5_image1.png>>`
    ```
    
-   KHÔNG tự đặt tên file. KHÔNG đoán. Copy CHÍNH XÁC từ CSV.
+   CHỈ lấy tên file (phần sau `images/`), KHÔNG bao gồm path.
    Nếu không có hình ảnh, ghi "Không có hình ảnh."
 
 Trình bày phân tích của bạn dưới dạng markdown ngôn ngữ tự nhiên (KHÔNG phải JSON). Ngắn gọn nhưng đầy đủ."""
@@ -307,12 +306,16 @@ def summarize_sheet(client: Anthropic, sheet_name: str, csv_path: str, images_di
         summary = message.content[0].text
         
         # Programmatically append image references as GUARANTEED section
-        # This ensures exact paths are preserved even if Claude's summary misses them
+        # Using placeholder tokens that will be post-processed into proper markdown
         if images:
             summary += "\n\n## 10. Danh sách hình ảnh (trích xuất tự động)\n\n"
-            summary += "**QUAN TRỌNG: Sử dụng CHÍNH XÁC các đường dẫn dưới đây khi nhúng hình ảnh vào BRD.**\n\n"
+            summary += "**QUAN TRỌNG: Khi muốn nhúng hình ảnh vào BRD, chỉ cần viết token `<<IMAGE:filename>>`. KHÔNG viết cú pháp markdown.**\n\n"
             for img in images:
-                summary += f"- Cell {img['cell']}: `{img['markdown']}`\n"
+                # Extract just the filename from markdown: ![desc](images/filename.png) -> filename.png
+                match = re.search(r'\(images/([^)]+)\)', img['markdown'])
+                if match:
+                    filename = match.group(1)
+                    summary += f"- Cell {img['cell']}: `<<IMAGE:{filename}>>`\n"
         
         # Add metadata footer
         images_analyzed = len(loaded_images)
