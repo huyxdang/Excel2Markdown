@@ -1,65 +1,58 @@
-# Phân tích Sheet Status
+# Phân tích Sheet "Status"
 
 ## 1. Loại sheet
-**quy-trình** - Sheet mô tả các quy trình nghiệp vụ và luồng trạng thái trong hệ thống quản lý tài sản.
+**quy-trình** - Sheet này mô tả các trạng thái và luồng xử lý trong quy trình quản lý tài sản.
 
 ## 2. Mức độ chi tiết
-**chi-tiết-cao** - Sheet chứa ma trận trạng thái chi tiết với các thông số kỹ thuật về state transitions, vai trò thực hiện, và mapping giữa các trạng thái khác nhau.
+**chi-tiết-cao** - Sheet chứa thông tin chi tiết về state transitions, status mapping và quy trình nghiệp vụ cụ thể cần giữ nguyên dạng bảng.
 
 ## 3. Chủ đề/tiêu đề chính
-**Ma trận trạng thái và luồng phê duyệt trong hệ thống quản lý tài sản** - Định nghĩa chi tiết các trạng thái, chuyển đổi trạng thái và quy trình phê duyệt cho 4 nghiệp vụ chính: Cấp tài sản, Thanh lý tài sản, Điều chuyển tài sản.
+**Ma trận trạng thái quy trình quản lý tài sản** - Định nghĩa các trạng thái, hành động và chuyển đổi trạng thái trong hệ thống quản lý tài sản.
 
 ## 4. Tóm tắt thông tin chính
 
-Sheet này định nghĩa một ma trận trạng thái phức tạp cho hệ thống quản lý tài sản, bao gồm 4 nhóm quy trình chính. Mỗi quy trình được chia thành nhiều bước con với các vai trò cụ thể, hành động có thể thực hiện, và trạng thái tương ứng của yêu cầu cũng như tài sản.
+Sheet Status định nghĩa chi tiết các quy trình nghiệp vụ chính trong hệ thống quản lý tài sản bao gồm: Cấp tài sản, Thanh lý tài sản và Điều chuyển tài sản. Mỗi quy trình được chia thành các sub-process với các trạng thái cụ thể và hành động tương ứng.
 
-Hệ thống hỗ trợ luồng phê duyệt đa cấp với khả năng từ chối, yêu cầu bổ sung thông tin, và rollback trạng thái. Đặc biệt có sự phân biệt rõ ràng giữa trạng thái của yêu cầu (Request Status) và trạng thái của tài sản (Asset Status), cho phép theo dõi song song cả quá trình xử lý yêu cầu và vòng đời tài sản.
+Đối với quy trình cấp tài sản, hệ thống hỗ trợ hai luồng chính: cấp tài sản không ở kho (luồng đơn giản) và cấp tài sản từ kho (luồng phức tạp hơn với nhiều bước phê duyệt). Quy trình thanh lý tài sản được chia thành hai phương thức: bán trực tiếp và bán đấu giá, mỗi phương thức có quy trình kiểm soát và phê duyệt riêng biệt.
 
-Các quy trình thanh lý (bán trực tiếp và đấu giá) có độ phức tạp cao nhất với nhiều bước kiểm soát và phê duyệt, trong khi quy trình cấp tài sản tương đối đơn giản hơn tùy thuộc vào nguồn tài sản (từ kho hay không từ kho).
+Hệ thống theo dõi song song cả trạng thái yêu cầu (Request Status) và trạng thái tài sản (Asset Status), đảm bảo tính nhất quán và truy vết được trong toàn bộ vòng đời của tài sản.
 
 ## 5. Các bên liên quan/vai trò được đề cập
-
-- **AMP** (Asset Management Personnel) - Nhân viên quản lý tài sản
-- **BU User** - Người dùng đơn vị kinh doanh  
-- **BU Head** - Trưởng đơn vị kinh doanh
-- **AM** (Asset Manager) - Quản lý tài sản
-- **WK** (Warehouse Keeper) - Thủ kho
-- **Warehouse Mgr.** - Quản lý kho
-- **Checker** - Người kiểm soát
-- **Approver** - Người phê duyệt
-- **System** - Hệ thống tự động
+- **AMP** (Asset Management Personnel): Nhân viên quản lý tài sản
+- **BU User**: Người dùng đơn vị kinh doanh  
+- **BU Head**: Trưởng đơn vị kinh doanh
+- **AM** (Asset Manager): Quản lý tài sản
+- **WK** (Warehouse Keeper): Thủ kho
+- **Warehouse Mgr.**: Quản lý kho
+- **Checker**: Người kiểm soát
+- **Approver**: Người phê duyệt
+- **System**: Hệ thống tự động
 
 ## 6. Các yêu cầu tìm thấy
-
-- Hệ thống phải hỗ trợ workflow đa cấp với khả năng phê duyệt/từ chối ở mỗi bước
-- Cần có cơ chế "Bổ sung thông tin" cho phép quay lại bước trước để cập nhật dữ liệu
-- Trạng thái yêu cầu và trạng thái tài sản phải được quản lý độc lập
-- Hệ thống phải tự động tạo yêu cầu xuất/nhập kho khi cần thiết
-- Cần có khả năng hủy/rollback trạng thái trong một số trường hợp cụ thể
-- Quy trình thanh lý phải trải qua ít nhất 2 lớp kiểm soát (Checker + Approver)
+- Hệ thống phải hỗ trợ workflow approval cho từng loại yêu cầu
+- Cần theo dõi trạng thái song song cho Request và Asset
+- Hỗ trợ chức năng từ chối và yêu cầu bổ sung thông tin tại mọi bước phê duyệt
+- Hệ thống tự động tạo yêu cầu xuất/nhập kho sau khi hoàn thành các bước phê duyệt
+- Khả năng hủy yêu cầu và trả về trạng thái ban đầu
+- Phân quyền rõ ràng theo vai trò cho từng hành động
 
 ## 7. Các sheet liên quan
-
-Không có tham chiếu trực tiếp đến sheet khác, nhưng có liên kết đến các module:
-- Module quản lý kho (Warehouse Management)
-- Module phê duyệt (Approval Workflow)
-- Module quản lý người dùng (User Role Management)
+Không có tham chiếu rõ ràng đến sheet khác trong nội dung.
 
 ## 8. Bảng cần giữ nguyên
 
-### Ma trận trạng thái nghiệp vụ quản lý tài sản
+### Ma trận trạng thái quy trình quản lý tài sản
 
 | Process | Sub-process | PIC | Action | Rq Status | Asset Status | Note |
-|---------|-------------|-----|---------|-----------|--------------|------|
-| **Cấp tài sản không ở kho** | | | | Cấp tài sản | - | |
-| | 1 Tạo yêu cầu | AMP | Lưu | Đang tạo | | |
+|---------|-------------|-----|--------|-----------|--------------|------|
+| **Cấp tài sản** | - | - | - | Cấp tài sản | Xuất kho | - |
+| Cấp tài sản không ở kho | 1. Tạo yêu cầu | AMP | Lưu | Đang tạo | | |
 | | | | Gửi | Chờ xác nhận | | |
 | | 2. Xác nhận | BU User | Từ chối | Từ chối | | |
 | | | | Xác nhận | Đã xác nhận | Đang sử dụng | Đã xác nhận >>> Đã nhận tài sản |
 | | | | Bổ sung thông tin | Bổ sung thông tin | | |
 | | 3. Bổ sung TT | AMP | Bổ sung thông tin | Chờ xác nhận | | |
-| **Cấp tài sản từ kho** | | | | Cấp tài sản | Xuất kho | |
-| | 1. Tạo yêu cầu | AMP | Lưu | Đang tạo | | |
+| **Cấp tài sản từ kho** | 1. Tạo yêu cầu | AMP | Lưu | Đang tạo | | |
 | | | | Gửi | Chờ xác nhận | | |
 | | 2. Phê duyệt | AM | Từ chối | Từ chối | | |
 | | | | Duyệt | Đã xác nhận | | |
@@ -70,12 +63,16 @@ Không có tham chiếu trực tiếp đến sheet khác, nhưng có liên kết
 | | | | Duyệt | Đã xác nhận | Chờ xác nhận | |
 | | 6. Nhận hàng | BU User | Từ chối | Từ chối | Từ chối | |
 | | | | Xác nhận | Đã xác nhận | Đã nhận tài sản | Đang sử dụng |
-
-### Ma trận trạng thái thanh lý tài sản
-
-| Process | Sub-process | PIC | Action | Rq Status | Asset Status | Note |
-|---------|-------------|-----|---------|-----------|--------------|------|
-| **Bán trực tiếp** | | | | Thanh lý | Xuất kho | |
+| **Thanh lý tài sản** | - | - | - | Thanh lý | Xuất kho | |
+| **Bán trực tiếp** | 1. Tạo yêu cầu | AMP | Lưu | Đang tạo | | |
+| | | | Gửi | Chờ kiểm soát | | |
+| | 2. Kiểm soát | Checker | Từ chối | Từ chối | | |
+| | | | Yêu cầu bổ sung thông tin | Bổ sung thông tin | | |
+| | | | Đồng ý | Chờ phê duyệt | | |
+| | 3. Phê duyệt | Approver | Từ chối | Đang tạo | | |
+| | | | Yêu cầu bổ sung thông tin | Bổ sung thông tin | | |
+| | | | Phê duyệt | Chờ cập nhật kết quả | | |
+| | 4.
 
 ---
-*Source: Status.csv | Rows: 87 | Generated by Claude Sonnet 4.5*
+*Source: Status.csv | Rows: 87 | Images: 0 | Generated by Claude Sonnet 4.5*

@@ -63,6 +63,45 @@ Mỗi bản tóm tắt chứa:
 6. Các yêu cầu tìm thấy (nếu có)
 7. Các sheet liên quan / tham chiếu
 8. **Bảng cần giữ nguyên** (nếu có) - Markdown tables từ sheet gốc
+9. Hình ảnh trong sheet (Claude's extraction - có thể không chính xác)
+10. **Danh sách hình ảnh (trích xuất tự động)** - NGUỒN CHÍNH XÁC cho đường dẫn hình ảnh
+
+---
+
+## QUAN TRỌNG NHẤT: Quy tắc Nhúng Hình ảnh
+
+### NGUỒN DUY NHẤT CHO ĐƯỜNG DẪN HÌNH ẢNH
+
+**CHỈ sử dụng đường dẫn hình ảnh từ "Section 10: Danh sách hình ảnh (trích xuất tự động)".**
+
+Section 10 được tạo bởi code programmatically và LUÔN CHÍNH XÁC.
+Section 9 (Hình ảnh trong sheet) có thể KHÔNG chính xác - KHÔNG sử dụng.
+
+### QUY TẮC TUYỆT ĐỐI
+
+1. **COPY-PASTE CHÍNH XÁC** từ Section 10
+   - Nếu Section 10 ghi: `![5.2.1a_B5](images/5_2_1a_B5_image1.png)`
+   - Thì BRD phải ghi: `![5.2.1a_B5](images/5_2_1a_B5_image1.png)`
+   
+2. **KHÔNG BAO GIỜ:**
+   - Tự đặt tên file như `images/warehouse_confirmation.png`
+   - Thay đổi underscore `_` thành dot `.`
+   - Thay đổi dot `.` thành underscore `_`
+   - Đoán hoặc suy luận tên file
+   - Sử dụng thông tin từ Section 9
+
+3. **NẾU KHÔNG TÌM THẤY Section 10:**
+   - Kiểm tra lại bản tóm tắt
+   - Nếu thực sự không có → sheet không có hình ảnh → không nhúng gì
+
+### Ví dụ ĐÚNG vs SAI
+
+| Trong Section 10 | ✅ ĐÚNG | ❌ SAI |
+|------------------|---------|--------|
+| `![5.2.1a_B5](images/5_2_1a_B5_image1.png)` | `![Giao diện nhập kho](images/5_2_1a_B5_image1.png)` | `![Giao diện](images/5.2.1a_B5_image1.png)` |
+| `![5_1_3a_B5](images/5_1_3a_B5_image2.png)` | `![Màn hình xác nhận](images/5_1_3a_B5_image2.png)` | `![Màn hình](images/warehouse_confirm.png)` |
+
+**LƯU Ý:** Bạn CÓ THỂ thay đổi phần mô tả `![...]` nhưng KHÔNG ĐƯỢC thay đổi phần đường dẫn `(images/...)`.
 
 ---
 
@@ -190,8 +229,8 @@ Hệ thống áp dụng các quy tắc chuyển trạng thái sau:
 ### Quy ước Đánh số
 
 - **Cấp 1:** 1., 2., 3., 4., v.v. (ví dụ: "1. Executive Summary" hoặc "1. Tóm Tắt Điều Hành")
-- **Cấp 2:** 1.1., 1.2., 2.1., 2.2., v.v. (ví dụ: "4.1. Asset Dashboard Module")
-- **Cấp 3:** 1.1.1., 1.1.2., 2.1.1., v.v. (ví dụ: "4.2.1. Create Warehouse Intake Request")
+- **Cấp 2:** 1.1., 1.2., 2.1., 2.2., v.v. (ví dụ: "4.1. Dashboard Tài Sản")
+- **Cấp 3:** 1.1.1., 1.1.2., 2.1.1., v.v. (ví dụ: "4.2.1. Tạo Yêu Cầu Nhập Kho")
 - **Cấp 4:** 1.1.1.1., 1.1.1.2., v.v. (nếu cần cho các tiểu mục chi tiết)
 
 ### Quy tắc cho Liên kết Nội bộ
@@ -204,16 +243,10 @@ Sử dụng **anchor dựa trên tiêu đề** được suy ra từ heading sect
 
 **Ví dụ:**
 - `### 1. Executive Summary` → anchor: `#1-executive-summary`
-- `### 4.1. Asset Dashboard Module` → anchor: `#41-asset-dashboard-module`
-- `### 4.2.1. Create Warehouse Intake Request` → anchor: `#421-create-warehouse-intake-request`
+- `### 4.1. Dashboard Tài Sản` → anchor: `#41-dashboard-tài-sản`
 - `### 4.2.1. Tạo Yêu Cầu Nhập Kho` → anchor: `#421-tạo-yêu-cầu-nhập-kho`
 
 **Định dạng liên kết:**
-```markdown
-Xem phần [4.2.1. Create Warehouse Intake Request](#421-create-warehouse-intake-request) để biết thêm chi tiết.
-```
-
-Hoặc nếu tên gốc tiếng Việt:
 ```markdown
 Xem phần [4.2.1. Tạo Yêu Cầu Nhập Kho](#421-tạo-yêu-cầu-nhập-kho) để biết thêm chi tiết.
 ```
@@ -231,33 +264,33 @@ Bạn PHẢI chủ động tạo liên kết nội bộ xuyên suốt tài liệ
 
 1. **Section cha liên kết đến con:**
    ```markdown
-   ### 4.2. Warehouse Management Module
+   ### 4.2. Module Quản Lý Kho
    
    Module này bao gồm các quy trình sau:
-   - [4.2.1. Create Warehouse Intake Request](#421-create-warehouse-intake-request)
-   - [4.2.2. Approve Warehouse Entry Request](#422-approve-warehouse-entry-request)
-   - [4.2.3. Warehouse Receipt Confirmation](#423-warehouse-receipt-confirmation)
+   - [4.2.1. Tạo Yêu Cầu Nhập Kho](#421-tạo-yêu-cầu-nhập-kho)
+   - [4.2.2. Xác Nhận Nhập Kho](#422-xác-nhận-nhập-kho)
+   - [4.2.3. Phê Duyệt Yêu Cầu Nhập Kho](#423-phê-duyệt-yêu-cầu-nhập-kho)
    ```
 
 2. **Các section liên quan liên kết với nhau:**
    ```markdown
-   ### 4.2.1. Create Warehouse Intake Request
+   ### 4.2.1. Tạo Yêu Cầu Nhập Kho
    
-   Sau khi tạo yêu cầu, quy trình chuyển sang [4.2.2. quy trình phê duyệt](#422-approve-warehouse-entry-request).
-   Để biết quy trình hủy, xem [4.2.4. Cancel Warehouse Entry Request](#424-cancel-warehouse-entry-request).
+   Sau khi tạo yêu cầu, quy trình chuyển sang [4.2.2. quy trình phê duyệt](#422-quy-trình-phê-duyệt).
+   Để biết quy trình hủy, xem [4.2.4. Huỷ Quy Trình Nhập Kho](#424-huỷ-quy-trình-nhập-kho).
    ```
 
 3. **Khi yêu cầu đề cập đến các quy trình khác:**
    ```markdown
    **Quy trình làm việc:**
    1. Hệ thống tạo yêu cầu nhập kho
-   2. Cập nhật trạng thái kích hoạt [quy trình phê duyệt](#422-approve-warehouse-entry-request)
-   3. Sau khi phê duyệt, chuyển sang [xác nhận nhập kho](#423-warehouse-receipt-confirmation)
+   2. Cập nhật trạng thái kích hoạt [quy trình phê duyệt](#422-quy-trình-phê-duyệt)
+   3. Sau khi phê duyệt, chuyển sang [xác nhận nhập kho](#423-xác-nhận-nhập-kho)
    ```
 
 4. **Trong phần Executive Summary và Overview:**
    ```markdown
-   Các sản phẩm chính bao gồm [module quản lý kho toàn diện](#42-warehouse-management-module) 
+   Các sản phẩm chính bao gồm [module quản lý kho toàn diện](#42-module-quản-lý-kho) 
    và [khả năng bảo trì tài sản](#43-asset-maintenance-module).
    ```
 
@@ -315,39 +348,9 @@ Quy trình này xử lý việc tạo yêu cầu nhập kho tự động khi tà
 
 ---
 
-## QUAN TRỌNG: Nhúng Hình ảnh
+## Vị trí Đặt Hình ảnh trong BRD
 
-Các bản tóm tắt sheet thường tham chiếu đến hình ảnh (ảnh chụp màn hình UI, sơ đồ quy trình, mockup). Những hình ảnh này PHẢI được nhúng vào BRD cuối cùng.
-
-### CRITICAL: GIỮ NGUYÊN CHÍNH XÁC TÊN FILE ẢNH
-
-**KHÔNG BAO GIỜ** tự đặt tên file ảnh. **LUÔN LUÔN** copy chính xác tên file từ bản tóm tắt.
-
-| ❌ SAI | ✅ ĐÚNG |
-|--------|---------|
-| `images/warehouse_confirmation.png` | `images/5_1_3a_B5_images2.png` |
-| `images/5.1.2a_B5_image2.png` | `images/5_12a_B6_image2.png` |
-| `images/asset_dashboard.png` | `images/4_1_B3_image1.png` |
-| `images/create_request_ui.png` | `images/5_1_1a_B5_image1.png` |
-
-**Quy tắc:**
-1. **Copy-paste chính xác** tên file từ bản tóm tắt sheet
-2. **KHÔNG dịch** tên file sang tiếng Việt hoặc tiếng Anh mô tả
-3. **KHÔNG thay đổi** định dạng số (underscore `_` vs dot `.`)
-4. **KHÔNG thêm/bớt** ký tự nào trong tên file
-5. **Kiểm tra kỹ** số sheet ID (5_1_3a vs 5_12a vs 5.1.2a)
-
-### Định dạng Đường dẫn Hình ảnh
-
-Hình ảnh được lưu trong thư mục con `images/`. Khi bản tóm tắt đề cập đến hình ảnh, nhúng với **TÊN FILE CHÍNH XÁC**:
-
-```markdown
-![Mô tả giao diện](images/5_1_3a_B5_images2.png)
-```
-
-**LƯU Ý:** Phần mô tả trong `![...]` có thể viết bằng tiếng Việt, nhưng phần `(images/...)` PHẢI giữ nguyên tên file gốc.
-
-### Vị trí Đặt Hình ảnh
+### Quy tắc Vị trí
 
 1. **Đối với sheet UI/Quy trình (sheet "a")**: Đặt hình ảnh ở ĐẦU tiểu mục thông số kỹ thuật UI, ngay sau heading:
 
@@ -359,11 +362,9 @@ Hình ảnh được lưu trong thư mục con `images/`. Khi bản tóm tắt �
 Quy trình này xử lý việc tạo yêu cầu nhập kho tự động...
 ```
 
-### QUAN TRỌNG: KHÔNG Bỏ qua Hình ảnh, KHÔNG Đổi Tên
+2. **Nhiều hình ảnh trong một sheet**: Đặt theo thứ tự cell (B5 trước C10, v.v.)
 
-- Nếu bản tóm tắt sheet đề cập đến file hình ảnh, bạn PHẢI bao gồm nó trong đầu ra
-- Bạn PHẢI sử dụng **CHÍNH XÁC** tên file như trong bản tóm tắt
-- Nếu không chắc chắn tên file, hãy để nguyên như trong input
+3. **Mô tả hình ảnh**: Có thể viết tiếng Việt mô tả nội dung, nhưng KHÔNG thay đổi đường dẫn
 
 ---
 
@@ -376,6 +377,7 @@ Kết hợp các sheet thành cặp thành **một section được đánh số 
 
 #### 4.2.1.1. Thông số kỹ thuật giao diện người dùng
 [Nội dung từ sheet "a" - quy trình, giao diện người dùng, tương tác các bên liên quan]
+[HÌNH ẢNH từ Section 10 của sheet "a"]
 [Thường là PROSE vì mô tả flow]
 
 #### 4.2.1.2. Thông số kỹ thuật chi tiết
@@ -388,17 +390,9 @@ Kết hợp các sheet thành cặp thành **một section được đánh số 
 ### 4.2.1. Create Warehouse Intake Request
 
 #### 4.2.1.1. Thông số kỹ thuật giao diện người dùng
-...
 
-#### 4.2.1.2. Thông số kỹ thuật chi tiết
-...
-```
+![Giao diện tạo yêu cầu](images/5_1_1a_B5_image1.png)
 
-**Ví dụ với tên tiếng Việt:**
-```markdown
-### 4.2.1. Tạo Yêu Cầu Nhập Kho
-
-#### 4.2.1.1. Thông số kỹ thuật giao diện người dùng
 ...
 
 #### 4.2.1.2. Thông số kỹ thuật chi tiết
@@ -429,6 +423,7 @@ Tổ chức nội dung tổng hợp theo cấu trúc được đánh số này. 
    - **Tổ chức theo chủ đề logic**
    - **Tiêu đề mỗi tiểu mục = Tên sheet gốc** (giữ nguyên tiếng Anh hoặc tiếng Việt)
    - **GIỮ NGUYÊN TABLES** từ bản tóm tắt khi có
+   - **NHÚNG HÌNH ẢNH** từ Section 10 với đường dẫn chính xác
    - Sử dụng đánh số: 5.1., 5.2., 5.2.1., v.v.
    
 ### 6. Assumptions & Constraints
@@ -455,8 +450,8 @@ Trước khi hoàn thành phản hồi, xác minh:
 8. ✅ Nội dung đầy đủ được bảo toàn
 9. ✅ Section cha liên kết đến các section con
 10. ✅ Có ít nhất 20+ liên kết nội bộ
-11. ✅ Tất cả hình ảnh được nhúng
-12. ✅ **TÊN FILE ẢNH CHÍNH XÁC** - copy nguyên từ bản tóm tắt, KHÔNG tự đặt tên
+11. ✅ **TẤT CẢ hình ảnh từ Section 10 được nhúng**
+12. ✅ **ĐƯỜNG DẪN HÌNH ẢNH CHÍNH XÁC 100%** - copy từ Section 10, KHÔNG tự đặt tên
 """
 
 
@@ -464,7 +459,17 @@ USER_PROMPT_TEMPLATE = """Dưới đây là các bản tóm tắt của {num_she
 
 Vui lòng tổng hợp những bản tóm tắt này thành một Tài liệu Yêu cầu Nghiệp vụ toàn diện theo hướng dẫn của bạn.
 
-**LƯU Ý QUAN TRỌNG:**
+**LƯU Ý QUAN TRỌNG VỀ HÌNH ẢNH:**
+
+⚠️ **CHỈ sử dụng đường dẫn hình ảnh từ "Section 10: Danh sách hình ảnh (trích xuất tự động)"**
+
+- Section 10 được tạo bởi code và LUÔN CHÍNH XÁC
+- Section 9 có thể KHÔNG chính xác - KHÔNG sử dụng
+- Copy-paste CHÍNH XÁC đường dẫn từ Section 10
+- KHÔNG thay đổi bất kỳ ký tự nào trong đường dẫn (underscore, dot, số, v.v.)
+- KHÔNG tự đặt tên file mô tả như `warehouse_confirmation.png`
+
+**CÁC LƯU Ý KHÁC:**
 1. **GIỮ NGUYÊN TÊN SHEET GỐC** làm tiêu đề section (tiếng Anh hoặc tiếng Việt - KHÔNG dịch)
 2. Thêm số thứ tự trước tiêu đề (1., 2.1., 5.2.3., v.v.)
 3. Kết hợp các sheet thành cặp (a/b) thành section duy nhất
@@ -472,7 +477,6 @@ Vui lòng tổng hợp những bản tóm tắt này thành một Tài liệu Y�
 5. **DÙNG PROSE** cho các sheet có mức độ chi tiết = `tổng-quan`
 6. Bảo toàn NỘI DUNG ĐẦY ĐỦ từ mỗi sheet
 7. **THÊM THAM CHIẾU CHÉO:** Nhắm đến 20+ liên kết nội bộ
-8. **NHÚNG TẤT CẢ HÌNH ẢNH với TÊN FILE CHÍNH XÁC** - copy nguyên tên từ bản tóm tắt, KHÔNG tự đặt tên mô tả như `warehouse_confirmation.png`
 
 ---
 
@@ -482,7 +486,11 @@ Vui lòng tổng hợp những bản tóm tắt này thành một Tài liệu Y�
 
 ---
 
-Vui lòng cung cấp BRD hoàn chỉnh ở định dạng Markdown với tiêu đề section giữ nguyên từ tên sheet gốc, tables được giữ nguyên khi cần, tham chiếu chéo nội bộ phong phú, và **tên file ảnh chính xác từ bản tóm tắt**.
+Vui lòng cung cấp BRD hoàn chỉnh ở định dạng Markdown với:
+- Tiêu đề section giữ nguyên từ tên sheet gốc
+- Tables được giữ nguyên khi cần
+- Tham chiếu chéo nội bộ phong phú
+- **Đường dẫn hình ảnh CHÍNH XÁC 100% từ Section 10**
 """
 
 def load_all_summaries(summaries_dir: str) -> dict:
@@ -610,6 +618,46 @@ def validate_brd_anchors(brd_content: str, sheet_ids: list) -> dict:
     return results
 
 
+def validate_image_paths(brd_content: str, summaries: dict) -> dict:
+    """
+    Validate that image paths in BRD match those in Section 10 of summaries.
+    
+    Returns:
+        Dictionary with validation results
+    """
+    import re
+    
+    # Extract all image paths from Section 10 of all summaries
+    valid_paths = set()
+    section_10_pattern = r'## 10\. Danh sách hình ảnh.*?(?=\n## |\n---|\Z)'
+    image_pattern = r'!\[[^\]]*\]\((images/[^)]+)\)'
+    
+    for sheet_name, summary in summaries.items():
+        # Find Section 10
+        section_match = re.search(section_10_pattern, summary, re.DOTALL)
+        if section_match:
+            section_content = section_match.group(0)
+            # Extract image paths from Section 10
+            for match in re.finditer(image_pattern, section_content):
+                valid_paths.add(match.group(1))
+    
+    # Extract all image paths used in BRD
+    brd_images = re.findall(image_pattern, brd_content)
+    
+    # Check for invalid paths
+    invalid_paths = []
+    for path in brd_images:
+        if path not in valid_paths:
+            invalid_paths.append(path)
+    
+    return {
+        'valid_paths': list(valid_paths),
+        'brd_images': brd_images,
+        'invalid_paths': invalid_paths,
+        'missing_images': list(valid_paths - set(brd_images))
+    }
+
+
 def synthesize_brd(client: Anthropic, summaries: dict, max_tokens: int = 32000) -> str:
     """
     Use Claude API to synthesize all summaries into a final BRD.
@@ -685,16 +733,36 @@ def synthesize_brd(client: Anthropic, summaries: dict, max_tokens: int = 32000) 
             else:
                 print(f"  ✅ All broken links fixed!")
         
+        # Validate image paths
+        print("\nValidating image paths...")
+        image_validation = validate_image_paths(brd_content, summaries)
+        print(f"  Valid paths from Section 10: {len(image_validation['valid_paths'])}")
+        print(f"  Images in BRD: {len(image_validation['brd_images'])}")
+        
+        if image_validation['invalid_paths']:
+            print(f"  ⚠️  Invalid/hallucinated paths: {image_validation['invalid_paths']}")
+        if image_validation['missing_images']:
+            print(f"  ⚠️  Missing images (in Section 10 but not in BRD): {image_validation['missing_images'][:10]}")
+        if not image_validation['invalid_paths'] and not image_validation['missing_images']:
+            print(f"  ✅ All image paths valid!")
+        
         # Add generation metadata at the end
         metadata = f"\n\n---\n\n*Generated by Claude Sonnet 4.5 from {len(summaries)} sheet summaries*\n"
-        metadata += f"*Headings: {len(validation['headings_found'])} | Internal Links: {len(validation['links_found'])}*\n"
+        metadata += f"*Headings: {len(validation['headings_found'])} | Internal Links: {len(validation['links_found'])} | Images: {len(image_validation['brd_images'])}*\n"
         
         # Check final validation state
         final_validation = validate_brd_anchors(brd_content, sheet_ids)
         if final_validation.get('broken_links') or validation.get('invalid_syntax'):
-            metadata += f"\n*⚠️ Validation warnings - some links may need manual review*\n"
+            metadata += f"\n*⚠️ Link validation warnings - some links may need manual review*\n"
         else:
             metadata += f"\n*✅ All internal links validated successfully*\n"
+        
+        if image_validation['invalid_paths']:
+            metadata += f"*⚠️ Image path warnings - {len(image_validation['invalid_paths'])} paths may be incorrect*\n"
+        elif image_validation['missing_images']:
+            metadata += f"*⚠️ {len(image_validation['missing_images'])} images from summaries not included in BRD*\n"
+        else:
+            metadata += f"*✅ All image paths validated successfully*\n"
         
         brd_content += metadata
         
