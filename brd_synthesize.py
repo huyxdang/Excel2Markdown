@@ -171,7 +171,7 @@ Hệ thống áp dụng các quy tắc chuyển trạng thái sau:
 
 ## QUAN TRỌNG: Cấu trúc Section và Liên kết Nội bộ
 
-### Phương pháp: Section được Đánh số với Tiêu đề tiếng Anh và Nội dung tiếng Việt
+### Phương pháp: Section được Đánh số với Tiêu đề viết bằng Nội dung tiếng Việt
 
 Sử dụng **tiêu đề section được đánh số bằng tiếng Anh** với **toàn bộ nội dung bằng tiếng Việt**. Markdown chuẩn tự động tạo anchor từ văn bản heading.
 
@@ -185,8 +185,8 @@ Module này cung cấp bảng điều khiển tổng quan về tài sản...
 
 ### Quy tắc cho Header Section
 
-1. **Tất cả tiêu đề section phải bằng tiếng Anh** với định dạng đánh số (ví dụ: 1., 2.1., 4.2.3.)
-2. **Tất cả nội dung trong section phải bằng tiếng Việt**
+1. **Chỉ tiêu đề section Cấp 1 viết bằng tiếng Anh** với định dạng đánh số (ví dụ: 1., 2., 3.). 
+2. **Tất cả nội dung còn lại trong section phải bằng tiếng Việt**
 3. **Giữ header sạch sẽ** - không có cú pháp `{#id}` hoặc tham chiếu sheet
 4. **Đối với các sheet liên quan (ví dụ: 5.1.1a UI + 5.1.1b Specs)**, kết hợp thành MỘT section được đánh số
 
@@ -209,7 +209,7 @@ Sử dụng **anchor dựa trên tiêu đề** được suy ra từ heading sect
 - `### 4.1. Asset Dashboard Module` → anchor: `#41-asset-dashboard-module`
 - `### 4.2.1. Create Warehouse Intake Request` → anchor: `#421-create-warehouse-intake-request`
 
-**Định dạng liên kết (văn bản tiếng Việt với anchor tiếng Anh):**
+**Định dạng liên kết (văn bản tiếng Việt với anchor):**
 ```markdown
 Xem phần [4.2.1. Create Warehouse Intake Request](#421-create-warehouse-intake-request) để biết thêm chi tiết.
 ```
@@ -349,7 +349,7 @@ Nếu bản tóm tắt sheet đề cập đến file hình ảnh, bạn PHẢI b
 Kết hợp các sheet thành cặp thành **một section được đánh số với hai tiểu mục**:
 
 ```markdown
-### 4.2.1. [Tiêu đề tiếng Anh từ các sheet]
+### 4.2.1. [Tiêu đề từ các sheet]
 
 #### 4.2.1.1. Thông số kỹ thuật giao diện người dùng
 [Nội dung tiếng Việt từ sheet "a" - quy trình, giao diện người dùng, tương tác các bên liên quan]
@@ -419,8 +419,8 @@ USER_PROMPT_TEMPLATE = """Dưới đây là các bản tóm tắt của {num_she
 Vui lòng tổng hợp những bản tóm tắt này thành một Tài liệu Yêu cầu Nghiệp vụ toàn diện theo hướng dẫn của bạn.
 
 **LƯU Ý QUAN TRỌNG:**
-1. Sử dụng header section ĐƯỢC ĐÁNH SỐ với tiêu đề tiếng Anh
-2. Viết TẤT CẢ nội dung bằng tiếng Việt
+1. Sử dụng header section Cấp 1 ĐƯỢC ĐÁNH SỐ với tiêu đề tiếng Anh
+2. Viết TẤT CẢ nội dung và headers còn lại bằng tiếng Việt
 3. Kết hợp các sheet thành cặp (a/b) thành section duy nhất
 4. **GIỮ NGUYÊN MARKDOWN TABLES** từ bản tóm tắt cho các sheet có mức độ chi tiết = `chi-tiết-cao`
 5. **DÙNG PROSE** cho các sheet có mức độ chi tiết = `tổng-quan`
@@ -436,7 +436,7 @@ Vui lòng tổng hợp những bản tóm tắt này thành một Tài liệu Y�
 
 ---
 
-Vui lòng cung cấp BRD hoàn chỉnh ở định dạng Markdown với tiêu đề tiếng Anh được đánh số, nội dung tiếng Việt, tables được giữ nguyên khi cần, và tham chiếu chéo nội bộ phong phú.
+Vui lòng cung cấp BRD hoàn chỉnh ở định dạng Markdown với tiêu đề cấp 1 tiếng Anh được đánh số, nội dung còn lại tiếng Việt, tables được giữ nguyên khi cần, và tham chiếu chéo nội bộ phong phú.
 """
 
 
