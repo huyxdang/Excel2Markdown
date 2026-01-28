@@ -213,7 +213,7 @@ Hệ thống tự động tạo yêu cầu nhập kho với mã số theo địn
 
 Giao diện phê duyệt yêu cầu nhập kho cho phép Warehouse Manager xem xét và quyết định về các yêu cầu nhập kho đã được tạo. Màn hình được thiết kế với ba phần chính: tìm kiếm yêu cầu, hiển thị chi tiết, và thực hiện quyết định.
 
-![Giao diện phê duyệt yêu cầu nhập kho](images/5.1.2a_B5_image4.png)
+![Giao diện phê duyệt yêu cầu nhập kho](images/5_1_2a_B5_image4.png)
 
 **Luồng xử lý:**
 1. Warehouse Manager tìm kiếm yêu cầu theo các tiêu chí
