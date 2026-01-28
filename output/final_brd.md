@@ -195,7 +195,7 @@ Hệ thống có cơ chế lock/unlock tài sản để đảm bảo tính nhấ
 
 ### 4.4. Nhập kho từ quy trình điều chuyển về kho - Phê duyệt
 
-![Giao diện phê duyệt yêu cầu nhập kho](images/5.1.2a_B6_image2.png)
+![Giao diện phê duyệt yêu cầu nhập kho](images/5_1_2a_B6_image2.png)
 
 #### 4.4.1. Thông số kỹ thuật giao diện người dùng
 
