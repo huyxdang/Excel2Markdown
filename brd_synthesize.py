@@ -229,8 +229,8 @@ Hệ thống áp dụng các quy tắc chuyển trạng thái sau:
 ### Quy ước Đánh số
 
 - **Cấp 1:** 1., 2., 3., 4., v.v. (ví dụ: "1. Executive Summary" hoặc "1. Tóm Tắt Điều Hành")
-- **Cấp 2:** 1.1., 1.2., 2.1., 2.2., v.v. (ví dụ: "4.1. Dashboard Tài Sản")
-- **Cấp 3:** 1.1.1., 1.1.2., 2.1.1., v.v. (ví dụ: "4.2.1. Tạo Yêu Cầu Nhập Kho")
+- **Cấp 2:** 1.1., 1.2., 2.1., 2.2., v.v. (ví dụ: "4.1. Asset Dashboard Module")
+- **Cấp 3:** 1.1.1., 1.1.2., 2.1.1., v.v. (ví dụ: "4.2.1. Create Warehouse Intake Request")
 - **Cấp 4:** 1.1.1.1., 1.1.1.2., v.v. (nếu cần cho các tiểu mục chi tiết)
 
 ### Quy tắc cho Liên kết Nội bộ
@@ -243,10 +243,16 @@ Sử dụng **anchor dựa trên tiêu đề** được suy ra từ heading sect
 
 **Ví dụ:**
 - `### 1. Executive Summary` → anchor: `#1-executive-summary`
-- `### 4.1. Dashboard Tài Sản` → anchor: `#41-dashboard-tài-sản`
+- `### 4.1. Asset Dashboard Module` → anchor: `#41-asset-dashboard-module`
+- `### 4.2.1. Create Warehouse Intake Request` → anchor: `#421-create-warehouse-intake-request`
 - `### 4.2.1. Tạo Yêu Cầu Nhập Kho` → anchor: `#421-tạo-yêu-cầu-nhập-kho`
 
 **Định dạng liên kết:**
+```markdown
+Xem phần [4.2.1. Create Warehouse Intake Request](#421-create-warehouse-intake-request) để biết thêm chi tiết.
+```
+
+Hoặc nếu tên gốc tiếng Việt:
 ```markdown
 Xem phần [4.2.1. Tạo Yêu Cầu Nhập Kho](#421-tạo-yêu-cầu-nhập-kho) để biết thêm chi tiết.
 ```
@@ -264,33 +270,33 @@ Bạn PHẢI chủ động tạo liên kết nội bộ xuyên suốt tài liệ
 
 1. **Section cha liên kết đến con:**
    ```markdown
-   ### 4.2. Module Quản Lý Kho
+   ### 4.2. Warehouse Management Module
    
    Module này bao gồm các quy trình sau:
-   - [4.2.1. Tạo Yêu Cầu Nhập Kho](#421-tạo-yêu-cầu-nhập-kho)
-   - [4.2.2. Xác Nhận Nhập Kho](#422-xác-nhận-nhập-kho)
-   - [4.2.3. Phê Duyệt Yêu Cầu Nhập Kho](#423-phê-duyệt-yêu-cầu-nhập-kho)
+   - [4.2.1. Create Warehouse Intake Request](#421-create-warehouse-intake-request)
+   - [4.2.2. Approve Warehouse Entry Request](#422-approve-warehouse-entry-request)
+   - [4.2.3. Warehouse Receipt Confirmation](#423-warehouse-receipt-confirmation)
    ```
 
 2. **Các section liên quan liên kết với nhau:**
    ```markdown
-   ### 4.2.1. Tạo Yêu Cầu Nhập Kho
+   ### 4.2.1. Create Warehouse Intake Request
    
-   Sau khi tạo yêu cầu, quy trình chuyển sang [4.2.2. quy trình phê duyệt](#422-quy-trình-phê-duyệt).
-   Để biết quy trình hủy, xem [4.2.4. Huỷ Quy Trình Nhập Kho](#424-huỷ-quy-trình-nhập-kho).
+   Sau khi tạo yêu cầu, quy trình chuyển sang [4.2.2. quy trình phê duyệt](#422-approve-warehouse-entry-request).
+   Để biết quy trình hủy, xem [4.2.4. Cancel Warehouse Entry Request](#424-cancel-warehouse-entry-request).
    ```
 
 3. **Khi yêu cầu đề cập đến các quy trình khác:**
    ```markdown
    **Quy trình làm việc:**
    1. Hệ thống tạo yêu cầu nhập kho
-   2. Cập nhật trạng thái kích hoạt [quy trình phê duyệt](#422-quy-trình-phê-duyệt)
-   3. Sau khi phê duyệt, chuyển sang [xác nhận nhập kho](#423-xác-nhận-nhập-kho)
+   2. Cập nhật trạng thái kích hoạt [quy trình phê duyệt](#422-approve-warehouse-entry-request)
+   3. Sau khi phê duyệt, chuyển sang [xác nhận nhập kho](#423-warehouse-receipt-confirmation)
    ```
 
 4. **Trong phần Executive Summary và Overview:**
    ```markdown
-   Các sản phẩm chính bao gồm [module quản lý kho toàn diện](#42-module-quản-lý-kho) 
+   Các sản phẩm chính bao gồm [module quản lý kho toàn diện](#42-warehouse-management-module) 
    và [khả năng bảo trì tài sản](#43-asset-maintenance-module).
    ```
 
@@ -354,17 +360,52 @@ Quy trình này xử lý việc tạo yêu cầu nhập kho tự động khi tà
 
 1. **Đối với sheet UI/Quy trình (sheet "a")**: Đặt hình ảnh ở ĐẦU tiểu mục thông số kỹ thuật UI, ngay sau heading:
 
+2. **QUAN TRỌNG: Đặt các bước thực hiện NGAY SAU hình ảnh**
+
+Nếu bản tóm tắt có mô tả các bước thực hiện (workflow steps) được trích xuất từ hình ảnh, 
+đặt chúng NGAY SAU hình ảnh với format:
+
 ```markdown
 #### 4.2.1.1. Thông số kỹ thuật giao diện người dùng
 
 ![Giao diện tạo yêu cầu nhập kho](images/5_1_1a_B5_image1.png)
 
+**Các bước thực hiện:**
+1. Người dùng chọn loại nhập kho từ dropdown
+2. Nhập thông tin tài sản (mã tài sản, tên, số lượng)
+3. Chọn kho đích từ danh sách
+4. Upload tài liệu đính kèm (nếu có)
+5. Nhấn nút "Tạo yêu cầu" để submit
+
+**Các thành phần giao diện:**
+- Header với breadcrumb navigation
+- Form nhập liệu với các trường bắt buộc
+- Bảng danh sách tài sản
+- Panel tệp đính kèm
+
 Quy trình này xử lý việc tạo yêu cầu nhập kho tự động...
 ```
 
-2. **Nhiều hình ảnh trong một sheet**: Đặt theo thứ tự cell (B5 trước C10, v.v.)
+3. **Nhiều hình ảnh trong một sheet**: Đặt theo thứ tự cell (B5 trước C10, v.v.), mỗi hình ảnh có các bước riêng (nếu có)
 
-3. **Mô tả hình ảnh**: Có thể viết tiếng Việt mô tả nội dung, nhưng KHÔNG thay đổi đường dẫn
+4. **Mô tả hình ảnh**: Có thể viết tiếng Việt mô tả nội dung, nhưng KHÔNG thay đổi đường dẫn
+
+### Cấu trúc Image + Steps
+
+```markdown
+![Mô tả hình ảnh](images/exact_path_from_section_10.png)
+
+**Các bước thực hiện:**
+1. Bước 1
+2. Bước 2
+3. Bước 3
+
+**Các thành phần giao diện:** (nếu có)
+- Thành phần 1
+- Thành phần 2
+
+[Prose mô tả thêm...]
+```
 
 ---
 
@@ -376,27 +417,47 @@ Kết hợp các sheet thành cặp thành **một section được đánh số 
 ### 4.2.1. [TÊN SHEET GỐC - giữ nguyên ngôn ngữ]
 
 #### 4.2.1.1. Thông số kỹ thuật giao diện người dùng
-[Nội dung từ sheet "a" - quy trình, giao diện người dùng, tương tác các bên liên quan]
 [HÌNH ẢNH từ Section 10 của sheet "a"]
-[Thường là PROSE vì mô tả flow]
+[CÁC BƯỚC THỰC HIỆN ngay sau hình ảnh]
+[CÁC THÀNH PHẦN GIAO DIỆN]
+[Nội dung từ sheet "a" - quy trình, giao diện người dùng, tương tác các bên liên quan]
 
 #### 4.2.1.2. Thông số kỹ thuật chi tiết
 [Nội dung từ sheet "b" - yêu cầu trường, quy tắc validation, hành vi hệ thống]
 [Thường có TABLES vì chi tiết specs]
 ```
 
-**Ví dụ với tên tiếng Anh:**
+**Ví dụ hoàn chỉnh:**
 ```markdown
-### 4.2.1. Create Warehouse Intake Request
+### 4.2.1. Tạo Yêu Cầu Nhập Kho
 
 #### 4.2.1.1. Thông số kỹ thuật giao diện người dùng
 
 ![Giao diện tạo yêu cầu](images/5_1_1a_B5_image1.png)
 
-...
+**Các bước thực hiện:**
+1. Người dùng truy cập màn hình Quản lý kho
+2. Chọn "Tạo yêu cầu nhập kho" từ menu
+3. Nhập thông tin yêu cầu (tiêu đề, mô tả)
+4. Chọn tài sản cần nhập kho từ danh sách
+5. Upload tài liệu đính kèm (nếu có)
+6. Nhấn "Gửi yêu cầu" để submit
+
+**Các thành phần giao diện:**
+- Header: Breadcrumb navigation, tiêu đề màn hình
+- Form: Các trường nhập liệu với validation
+- Table: Danh sách tài sản có thể chọn
+- Footer: Nút Hủy và Gửi yêu cầu
+
+Quy trình này được khởi tạo khi người dùng cần nhập tài sản mới vào kho...
 
 #### 4.2.1.2. Thông số kỹ thuật chi tiết
-...
+
+**Đặc tả trường dữ liệu:**
+
+| Tên trường | Kiểu dữ liệu | Độ dài | Bắt buộc | Validation |
+|------------|--------------|--------|----------|------------|
+| ... | ... | ... | ... | ... |
 ```
 
 ---

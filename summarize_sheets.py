@@ -35,6 +35,7 @@ import os
 import csv
 import glob
 import re
+import base64
 import argparse
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -183,9 +184,44 @@ def extract_image_references(csv_content: str) -> list[dict]:
     return results
 
 
-def summarize_sheet(client: Anthropic, sheet_name: str, csv_path: str, max_tokens: int = 2000) -> str:
+def load_image_as_base64(image_path: str) -> tuple[str, str] | None:
+    """
+    Load an image file and return as base64 with media type.
+    
+    Returns:
+        Tuple of (base64_data, media_type) or None if failed
+    """
+    if not os.path.exists(image_path):
+        return None
+    
+    # Determine media type from extension
+    ext = os.path.splitext(image_path)[1].lower()
+    media_types = {
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp'
+    }
+    
+    media_type = media_types.get(ext)
+    if not media_type:
+        return None
+    
+    try:
+        with open(image_path, 'rb') as f:
+            base64_data = base64.b64encode(f.read()).decode('utf-8')
+        return (base64_data, media_type)
+    except Exception as e:
+        safe_print(f"    Warning: Could not load image {image_path}: {e}")
+        return None
+
+
+def summarize_sheet(client: Anthropic, sheet_name: str, csv_path: str, images_dir: str = None, max_tokens: int = 3000) -> str:
     """
     Use Claude API to summarize a single sheet.
+    
+    If images_dir is provided and images exist, sends them to Claude for analysis.
     
     Returns:
         Markdown summary text
@@ -198,17 +234,70 @@ def summarize_sheet(client: Anthropic, sheet_name: str, csv_path: str, max_token
     # Extract image references programmatically (backup guarantee)
     images = extract_image_references(content)
     
-    prompt = SUMMARIZATION_PROMPT.format(
-        sheet_name=sheet_name,
-        content=content
-    )
+    # Build the message content (text + optional images)
+    message_content = []
+    
+    # Load actual images if images_dir provided
+    loaded_images = []
+    if images_dir and images:
+        for img in images:
+            # Extract filename from markdown: ![desc](images/filename.png) -> filename.png
+            match = re.search(r'\(images/([^)]+)\)', img['markdown'])
+            if match:
+                filename = match.group(1)
+                image_path = os.path.join(images_dir, filename)
+                image_data = load_image_as_base64(image_path)
+                if image_data:
+                    base64_data, media_type = image_data
+                    loaded_images.append({
+                        'cell': img['cell'],
+                        'markdown': img['markdown'],
+                        'filename': filename,
+                        'base64': base64_data,
+                        'media_type': media_type
+                    })
+    
+    # Build prompt with image analysis instructions if we have images
+    if loaded_images:
+        prompt = SUMMARIZATION_PROMPT.format(
+            sheet_name=sheet_name,
+            content=content
+        )
+        prompt += f"\n\n**HÌNH ẢNH ĐÍNH KÈM:** Sheet này có {len(loaded_images)} hình ảnh. Hãy phân tích từng hình ảnh và mô tả:\n"
+        prompt += "- Các thành phần UI (buttons, forms, tables, etc.)\n"
+        prompt += "- Các bước thực hiện quy trình được thể hiện\n"
+        prompt += "- Luồng công việc (workflow) nếu có\n\n"
+        
+        for i, img in enumerate(loaded_images, 1):
+            prompt += f"Hình {i} (Cell {img['cell']}): `{img['markdown']}`\n"
+        
+        # Add text prompt first
+        message_content.append({"type": "text", "text": prompt})
+        
+        # Add images
+        for img in loaded_images:
+            message_content.append({
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": img['media_type'],
+                    "data": img['base64']
+                }
+            })
+    else:
+        # No images - just send text
+        prompt = SUMMARIZATION_PROMPT.format(
+            sheet_name=sheet_name,
+            content=content
+        )
+        message_content.append({"type": "text", "text": prompt})
     
     try:
         message = client.messages.create(
             model="claude-sonnet-4-20250514",
             max_tokens=max_tokens,
             messages=[
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": message_content}
             ]
         )
         
@@ -223,7 +312,8 @@ def summarize_sheet(client: Anthropic, sheet_name: str, csv_path: str, max_token
                 summary += f"- Cell {img['cell']}: `{img['markdown']}`\n"
         
         # Add metadata footer
-        summary += f"\n\n---\n*Source: {sheet_name}.csv | Rows: {row_count} | Images: {len(images)} | Generated by Claude Sonnet 4.5*\n"
+        images_analyzed = len(loaded_images)
+        summary += f"\n\n---\n*Source: {sheet_name}.csv | Rows: {row_count} | Images: {len(images)} | Images analyzed: {images_analyzed} | Generated by Claude Sonnet 4.5*\n"
         
         return summary
         
@@ -250,12 +340,12 @@ def process_single_sheet(
     Process a single sheet - worker function for parallel execution.
     
     Args:
-        args: Tuple of (csv_path, output_dir, api_key, index, total)
+        args: Tuple of (csv_path, output_dir, images_dir, api_key, index, total)
         
     Returns:
         Dictionary with result info
     """
-    csv_path, output_dir, api_key, index, total = args
+    csv_path, output_dir, images_dir, api_key, index, total = args
     
     sheet_name = get_sheet_name_from_filename(csv_path)
     output_md = os.path.join(output_dir, f"{sheet_name}.md")
@@ -264,7 +354,7 @@ def process_single_sheet(
     client = Anthropic(api_key=api_key)
     
     try:
-        summary = summarize_sheet(client, sheet_name, csv_path)
+        summary = summarize_sheet(client, sheet_name, csv_path, images_dir)
         
         # Write summary to file
         with open(output_md, 'w', encoding='utf-8') as f:
@@ -294,7 +384,8 @@ def summarize_all_sheets(
     sheets_dir: str, 
     output_dir: str, 
     api_key: str = None,
-    max_workers: int = 5
+    max_workers: int = 5,
+    images_dir: str = None
 ) -> dict:
     """
     Summarize all CSV sheets in the directory using parallel processing.
@@ -304,6 +395,7 @@ def summarize_all_sheets(
         output_dir: Directory to save markdown summaries
         api_key: Optional API key (uses env var if not provided)
         max_workers: Maximum number of parallel API calls (default: 5)
+        images_dir: Directory containing extracted images (for visual analysis)
         
     Returns:
         Dictionary with summarization results
@@ -326,6 +418,8 @@ def summarize_all_sheets(
     total = len(csv_files)
     print(f"Found {total} CSV files")
     print(f"Using {max_workers} parallel workers")
+    if images_dir:
+        print(f"Images dir: {images_dir}")
     print("-" * 60)
     
     results = {
@@ -336,7 +430,7 @@ def summarize_all_sheets(
     
     # Prepare arguments for each worker
     work_items = [
-        (csv_path, output_dir, api_key, i + 1, total)
+        (csv_path, output_dir, images_dir, api_key, i + 1, total)
         for i, csv_path in enumerate(csv_files)
     ]
     
@@ -421,6 +515,11 @@ def main():
         help='Number of parallel workers for API calls (default: 5)'
     )
     
+    parser.add_argument(
+        '--images-dir', '-i',
+        help='Directory containing extracted images for visual analysis (e.g., output/images)'
+    )
+    
     args = parser.parse_args()
     
     if not os.path.exists(args.sheets_dir):
@@ -437,17 +536,29 @@ def main():
         print("  3. Use --api-key argument")
         sys.exit(1)
     
+    # Validate images directory if provided
+    images_dir = args.images_dir
+    if images_dir and not os.path.exists(images_dir):
+        print(f"Warning: Images directory not found: {images_dir}")
+        print("         Proceeding without image analysis.")
+        images_dir = None
+    
     print(f"Sheets dir: {args.sheets_dir}")
     print(f"Output dir: {args.output_dir}")
     print(f"Model: Claude Sonnet 4.5")
     print(f"Workers: {args.workers}")
+    if images_dir:
+        print(f"Images dir: {images_dir} (visual analysis enabled)")
+    else:
+        print(f"Images dir: Not provided (visual analysis disabled)")
     print("=" * 60)
     
     results = summarize_all_sheets(
         args.sheets_dir, 
         args.output_dir, 
         api_key,
-        max_workers=args.workers
+        max_workers=args.workers,
+        images_dir=images_dir
     )
     
     print("=" * 60)
