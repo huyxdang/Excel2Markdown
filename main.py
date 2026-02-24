@@ -53,8 +53,6 @@ def main():
     parser.add_argument('--skip-images', action='store_true', help='Skip image analysis')
     parser.add_argument('--workers', '-w', type=int, default=10, help='Parallel workers')
     parser.add_argument('--clean', action='store_true', help='Clean output directory first')
-    parser.add_argument('--format', dest='output_format', choices=['csv', 'json'], default='csv',
-                        help='Sheet extraction format (default: csv)')
     args = parser.parse_args()
     
     # Validate inputs
@@ -86,8 +84,7 @@ def main():
     # Step 1: Extract
     if not args.skip_extract:
         success, timings['extract'] = run_command(
-            [sys.executable, str(script_dir / 'extract_all_sheets.py'), str(excel_path), str(output_dir),
-             '--format', args.output_format],
+            [sys.executable, str(script_dir / 'extract_all_sheets.py'), str(excel_path), str(output_dir)],
             "Step 1/3: Extracting sheets"
         )
         if not success:

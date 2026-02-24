@@ -57,11 +57,11 @@ def get_sheet_names(excel_path: str) -> list:
 
 
 def _extract_single_sheet(excel_path: str, sheet_name: str, output_file: str,
-                          output_format: str, index: int, total: int) -> dict:
+                          index: int, total: int) -> dict:
     """Extract a single sheet — worker function for parallel execution."""
     safe_name = os.path.basename(output_file)
     try:
-        convert_file(excel_path, output_file, sheet_name, output_format, quiet=True)
+        convert_file(excel_path, output_file, sheet_name, quiet=True)
         file_size = os.path.getsize(output_file) if os.path.exists(output_file) else 0
         print(f"[{index}/{total}] ✓ '{sheet_name}' ({file_size:,} bytes)")
         return {'status': 'success', 'sheet_name': sheet_name,
@@ -71,25 +71,22 @@ def _extract_single_sheet(excel_path: str, sheet_name: str, output_file: str,
         return {'status': 'failed', 'sheet_name': sheet_name, 'error': str(e)}
 
 
-def extract_all_sheets(excel_path: str, output_dir: str, output_format: str = "csv",
+def extract_all_sheets(excel_path: str, output_dir: str,
                        max_workers: int = 10) -> dict:
     """
     Extract all sheets from Excel file using parallel direct function calls.
 
     Args:
         excel_path: Path to Excel file
-        output_dir: Directory to save CSV/JSON files
-        output_format: "csv" or "json"
+        output_dir: Directory to save CSV files
         max_workers: Number of parallel workers
 
     Returns:
         Dictionary with extraction results
     """
-    # Create output directories
     sheets_dir = os.path.join(output_dir, 'sheets')
     os.makedirs(sheets_dir, exist_ok=True)
 
-    # Get all sheet names
     sheet_names = get_sheet_names(excel_path)
     total = len(sheet_names)
     print(f"Found {total} sheets: {sheet_names}")
@@ -102,16 +99,14 @@ def extract_all_sheets(excel_path: str, output_dir: str, output_format: str = "c
         'sheets': {}
     }
 
-    ext = output_format  # "csv" or "json"
-
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = {}
         for i, sheet_name in enumerate(sheet_names):
             safe_name = sanitize_filename(sheet_name)
-            output_file = os.path.join(sheets_dir, f"{safe_name}.{ext}")
+            output_file = os.path.join(sheets_dir, f"{safe_name}.csv")
             future = executor.submit(
                 _extract_single_sheet, excel_path, sheet_name, output_file,
-                output_format, i + 1, total
+                i + 1, total
             )
             futures[future] = sheet_name
 
@@ -154,8 +149,6 @@ def main():
     parser = argparse.ArgumentParser(description="Extract all sheets from Excel file")
     parser.add_argument('excel_file', help='Input Excel file (.xlsx)')
     parser.add_argument('output_dir', help='Output directory')
-    parser.add_argument('--format', dest='output_format', choices=['csv', 'json'], default='csv',
-                        help='Output format (default: csv)')
     parser.add_argument('--workers', '-w', type=int, default=10, help='Parallel workers (default: 10)')
     args = parser.parse_args()
 
@@ -165,10 +158,9 @@ def main():
 
     print(f"Excel file: {args.excel_file}")
     print(f"Output dir: {args.output_dir}")
-    print(f"Format:     {args.output_format}")
     print("=" * 60)
 
-    results = extract_all_sheets(args.excel_file, args.output_dir, args.output_format, args.workers)
+    results = extract_all_sheets(args.excel_file, args.output_dir, args.workers)
 
     print("=" * 60)
     print(f"✅ Extraction complete")

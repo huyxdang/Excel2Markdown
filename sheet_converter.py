@@ -38,7 +38,6 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter, column_index_from_string
 from zipfile import ZipFile
 import xml.etree.ElementTree as ET
-import json
 import sys
 import os
 import re
@@ -52,6 +51,51 @@ NAMESPACES = {
     'r': 'http://schemas.openxmlformats.org/officeDocument/2006/relationships',
     'rel': 'http://schemas.openxmlformats.org/package/2006/relationships',
 }
+
+
+# ---------------------------------------------------------------------------
+# Internal helpers that operate on already-open openpyxl objects.
+# These avoid redundant load_workbook() calls when the caller already has
+# a workbook/sheet open.
+# ---------------------------------------------------------------------------
+
+def _get_drawing_path_from_sheet(sheet) -> Optional[str]:
+    """Extract drawing XML path from an already-open worksheet."""
+    if hasattr(sheet, '_rels') and sheet._rels:
+        for rel in sheet._rels:
+            if 'drawing' in rel.Target.lower():
+                drawing_path = rel.Target
+                if drawing_path.startswith('..'):
+                    drawing_path = 'xl' + drawing_path[2:]
+                elif not drawing_path.startswith('xl/'):
+                    drawing_path = 'xl/drawings/' + drawing_path.split('/')[-1]
+                return drawing_path
+    return None
+
+
+def _extract_hyperlinks_from_sheet(sheet) -> Dict[str, str]:
+    """Extract all hyperlinks from an already-open worksheet."""
+    hyperlinks = {}
+
+    if hasattr(sheet, '_hyperlinks') and sheet._hyperlinks:
+        for hyperlink in sheet._hyperlinks:
+            cell_ref = hyperlink.ref
+            if hyperlink.location:
+                hyperlinks[cell_ref] = f"#{hyperlink.location}"
+            elif hyperlink.target:
+                hyperlinks[cell_ref] = hyperlink.target
+
+    for row in sheet.iter_rows():
+        for cell in row:
+            if cell.hyperlink:
+                cell_ref = f"{get_column_letter(cell.column)}{cell.row}"
+                if cell_ref not in hyperlinks:
+                    if cell.hyperlink.location:
+                        hyperlinks[cell_ref] = f"#{cell.hyperlink.location}"
+                    elif cell.hyperlink.target:
+                        hyperlinks[cell_ref] = cell.hyperlink.target
+
+    return hyperlinks
 
 
 def get_sheet_drawing_path(excel_path: str, sheet_name: str) -> Optional[str]:
@@ -76,61 +120,9 @@ def get_sheet_drawing_path(excel_path: str, sheet_name: str) -> Optional[str]:
     """
     wb = load_workbook(excel_path, data_only=False)
     sheet = wb[sheet_name]
-    drawing_path = None
-    
-    if hasattr(sheet, '_rels') and sheet._rels:
-        for rel in sheet._rels:
-            if 'drawing' in rel.Target.lower():
-                drawing_path = rel.Target
-                # Convert relative path to absolute path within ZIP
-                if drawing_path.startswith('..'):
-                    drawing_path = 'xl' + drawing_path[2:]
-                elif not drawing_path.startswith('xl/'):
-                    drawing_path = 'xl/drawings/' + drawing_path.split('/')[-1]
-                break
-    
+    drawing_path = _get_drawing_path_from_sheet(sheet)
     wb.close()
     return drawing_path
-
-
-def get_drawing_rels(excel_path: str, drawing_path: str) -> Dict[str, str]:
-    """
-    Parse the drawing relationships file to map rId references to image paths.
-    
-    Drawing XML files reference images by rId (e.g., 'rId1'). The .rels file
-    maps these IDs to actual file paths within the ZIP archive.
-    
-    Args:
-        excel_path: Path to the .xlsx file
-        drawing_path: Path to the drawing XML within the ZIP
-                      (e.g., 'xl/drawings/drawing2.xml')
-        
-    Returns:
-        Dictionary mapping rId to image path
-        Example: {'rId1': 'xl/media/image2.png', 'rId2': 'xl/media/image3.png'}
-    """
-    rels = {}
-    
-    # Construct rels path: xl/drawings/drawing2.xml -> xl/drawings/_rels/drawing2.xml.rels
-    drawing_filename = drawing_path.split('/')[-1]
-    rels_path = f"xl/drawings/_rels/{drawing_filename}.rels"
-    
-    with ZipFile(excel_path, 'r') as zf:
-        if rels_path not in zf.namelist():
-            return rels
-        
-        rels_xml = zf.read(rels_path).decode('utf-8')
-        root = ET.fromstring(rels_xml)
-        
-        for rel in root.findall('.//{http://schemas.openxmlformats.org/package/2006/relationships}Relationship'):
-            rid = rel.get('Id')
-            target = rel.get('Target')
-            # Convert relative path: ../media/image1.png -> xl/media/image1.png
-            if target.startswith('..'):
-                target = 'xl' + target[2:]
-            rels[rid] = target
-    
-    return rels
 
 
 def process_anchor(
@@ -242,38 +234,52 @@ def extract_images_from_drawing(
         List of image info dictionaries (see process_anchor for structure)
     """
     images = []
-    
+
     if not drawing_path:
         return images
-    
-    # Get rId -> image path mapping
-    rels = get_drawing_rels(excel_path, drawing_path)
-    if not rels:
-        return images
-    
+
+    # Parse rels and drawing XML in a single ZipFile open
+    drawing_filename = drawing_path.split('/')[-1]
+    rels_path = f"xl/drawings/_rels/{drawing_filename}.rels"
+
     with ZipFile(excel_path, 'r') as zf:
+        # Build rId -> image path mapping (was a separate get_drawing_rels call)
+        rels = {}
+        if rels_path in zf.namelist():
+            rels_xml = zf.read(rels_path).decode('utf-8')
+            rels_root = ET.fromstring(rels_xml)
+            for rel in rels_root.findall('.//{http://schemas.openxmlformats.org/package/2006/relationships}Relationship'):
+                rid = rel.get('Id')
+                target = rel.get('Target')
+                if target.startswith('..'):
+                    target = 'xl' + target[2:]
+                rels[rid] = target
+
+        if not rels:
+            return images
+
         if drawing_path not in zf.namelist():
             return images
-        
+
         # Parse drawing XML
         drawing_xml = zf.read(drawing_path).decode('utf-8')
         root = ET.fromstring(drawing_xml)
-        
+
         # Create images output directory
         images_dir = os.path.join(output_dir, 'images')
         os.makedirs(images_dir, exist_ok=True)
-        
+
         # Process both anchor types
         for anchor in root.findall('.//xdr:twoCellAnchor', NAMESPACES):
             img_info = process_anchor(anchor, rels, zf, images_dir, sheet_name)
             if img_info:
                 images.append(img_info)
-        
+
         for anchor in root.findall('.//xdr:oneCellAnchor', NAMESPACES):
             img_info = process_anchor(anchor, rels, zf, images_dir, sheet_name)
             if img_info:
                 images.append(img_info)
-    
+
     return images
 
 
@@ -320,33 +326,7 @@ def extract_hyperlinks(excel_path: str, sheet_name: str) -> Dict[str, str]:
     """
     wb = load_workbook(excel_path, data_only=False)
     sheet = wb[sheet_name]
-    
-    hyperlinks = {}
-    
-    # Method 1: Check sheet._hyperlinks collection (openpyxl 3.x)
-    if hasattr(sheet, '_hyperlinks') and sheet._hyperlinks:
-        for hyperlink in sheet._hyperlinks:
-            cell_ref = hyperlink.ref
-            
-            # Internal link (to another sheet)
-            if hyperlink.location:
-                hyperlinks[cell_ref] = f"#{hyperlink.location}"
-            # External link (URL)
-            elif hyperlink.target:
-                hyperlinks[cell_ref] = hyperlink.target
-    
-    # Method 2: Iterate through cells and check cell.hyperlink
-    # This catches hyperlinks that might not be in the collection
-    for row in sheet.iter_rows():
-        for cell in row:
-            if cell.hyperlink:
-                cell_ref = f"{get_column_letter(cell.column)}{cell.row}"
-                if cell_ref not in hyperlinks:
-                    if cell.hyperlink.location:
-                        hyperlinks[cell_ref] = f"#{cell.hyperlink.location}"
-                    elif cell.hyperlink.target:
-                        hyperlinks[cell_ref] = cell.hyperlink.target
-    
+    hyperlinks = _extract_hyperlinks_from_sheet(sheet)
     wb.close()
     return hyperlinks
 
@@ -425,22 +405,22 @@ def get_sheet_relationships(excel_path: str) -> Dict[str, List[str]]:
     """
     wb = load_workbook(excel_path, data_only=False)
     sheet_names = wb.sheetnames
-    wb.close()
-    
+
     relationships = {}
-    
-    for sheet_name in sheet_names:
-        hyperlinks = extract_hyperlinks(excel_path, sheet_name)
+
+    for sn in sheet_names:
+        hyperlinks = _extract_hyperlinks_from_sheet(wb[sn])
         targets = set()
-        
+
         for cell_ref, link in hyperlinks.items():
             parsed = parse_internal_link(link)
             if parsed and parsed['sheet'] in sheet_names:
                 targets.add(parsed['sheet'])
-        
+
         if targets:
-            relationships[sheet_name] = sorted(list(targets))
-    
+            relationships[sn] = sorted(list(targets))
+
+    wb.close()
     return relationships
 
 
@@ -460,34 +440,32 @@ def excel_to_csv(excel_path: str, sheet_name: str = None, output_dir: str = '.')
         output_dir: Directory to save extracted images
         
     Returns:
-        CSV string with format:
+        Sparse CSV string — only non-empty cells are included per row:
             Sheet: SheetName
-            A1: value1,B1: [Link Text](→OtherSheet),C1: ![Image](images/C1_Picture.png)
-            A2: value3,B2:,C2: value4
-            
+            A1: value1,B1: [Link Text](→OtherSheet)
+            B2: value2,C2: ![Image](images/C2_Picture.png)
+
     Note:
         Images don't count toward Excel's max_row/max_col, so this function
         extends the iteration range to include cells containing images.
     """
-    # Load workbook to get sheet info
-    wb = load_workbook(excel_path, data_only=True)
-    
+    # Open once with data_only=False to extract metadata (drawing path + hyperlinks)
+    wb_meta = load_workbook(excel_path, data_only=False)
     if sheet_name:
-        sheet = wb[sheet_name]
+        sheet_meta = wb_meta[sheet_name]
     else:
-        sheet = wb.active
-        sheet_name = sheet.title
-    
-    wb.close()
-    
-    # Extract images using drawing XML (bypasses openpyxl's broken image loading)
-    images = extract_images(excel_path, sheet_name, output_dir)
+        sheet_meta = wb_meta.active
+        sheet_name = sheet_meta.title
+
+    drawing_path = _get_drawing_path_from_sheet(sheet_meta)
+    hyperlinks = _extract_hyperlinks_from_sheet(sheet_meta)
+    wb_meta.close()
+
+    # Extract images via ZIP parsing (no openpyxl needed)
+    images = extract_images_from_drawing(excel_path, drawing_path, output_dir, sheet_name)
     image_dict = {img['cell']: img['markdown'] for img in images}
-    
-    # Extract hyperlinks
-    hyperlinks = extract_hyperlinks(excel_path, sheet_name)
-    
-    # Reload for data extraction
+
+    # Open once with data_only=True for cell values
     wb = load_workbook(excel_path, data_only=True)
     sheet = wb[sheet_name]
     
@@ -505,139 +483,39 @@ def excel_to_csv(excel_path: str, sheet_name: str = None, output_dir: str = '.')
             max_row = max(max_row, img_row)
             max_col = max(max_col, img_col)
     
-    # Build CSV lines
+    # Build sparse CSV lines (only non-empty cells)
     csv_lines = [f"Sheet: {sheet.title}"]
-    
+
     for row in sheet.iter_rows(min_row=1, max_row=max_row, max_col=max_col):
         row_values = []
         for cell in row:
             col_letter = get_column_letter(cell.column)
             row_num = cell.row
             cell_coord = f"{col_letter}{row_num}"
-            
+
             if cell_coord in image_dict:
-                # Cell has image
                 row_values.append(f"{cell_coord}: {image_dict[cell_coord]}")
             elif cell.value is not None:
                 value = str(cell.value)
-                # Handle newlines in cell content
                 value = value.replace('\n', '\\n')
-                
-                # Check if cell has hyperlink
+
                 if cell_coord in hyperlinks:
                     link = hyperlinks[cell_coord]
                     parsed = parse_internal_link(link)
-                    
+
                     if parsed:
-                        # Internal link: [Text](→SheetName)
                         value = f"[{value}](→{parsed['sheet']})"
                     else:
-                        # External link: [Text](URL)
                         value = f"[{value}]({link})"
-                
+
                 row_values.append(f"{cell_coord}: {value}")
-            else:
-                row_values.append(f"{cell_coord}:")
-        
-        csv_lines.append(','.join(row_values))
+            # Skip empty cells entirely (sparse format)
+
+        if row_values:
+            csv_lines.append(','.join(row_values))
     
     wb.close()
     return '\n'.join(csv_lines)
-
-
-def excel_to_json(excel_path: str, sheet_name: str = None, output_dir: str = '.') -> dict:
-    """
-    Convert an Excel worksheet to a JSON-friendly dict.
-
-    Same extraction logic as excel_to_csv() but outputs a compact structure:
-    - rows: 2D list of values (null for empty cells), with image/hyperlink
-      markdown inlined just like CSV.
-    - images: list of {cell, filename, markdown} for downstream use.
-    - hyperlinks: dict mapping cell ref to link target.
-
-    Args:
-        excel_path: Path to the .xlsx file
-        sheet_name: Name of sheet to convert (None = first/active sheet)
-        output_dir: Directory to save extracted images
-
-    Returns:
-        dict with keys: sheet, rows, images, hyperlinks
-    """
-    wb = load_workbook(excel_path, data_only=True)
-
-    if sheet_name:
-        sheet = wb[sheet_name]
-    else:
-        sheet = wb.active
-        sheet_name = sheet.title
-
-    wb.close()
-
-    # Extract images and hyperlinks (same as CSV path)
-    images = extract_images(excel_path, sheet_name, output_dir)
-    image_dict = {img['cell']: img['markdown'] for img in images}
-    hyperlinks = extract_hyperlinks(excel_path, sheet_name)
-
-    # Reload for data extraction
-    wb = load_workbook(excel_path, data_only=True)
-    sheet = wb[sheet_name]
-
-    # Calculate max row/col including image positions
-    max_row = sheet.max_row
-    max_col = sheet.max_column
-
-    for img in images:
-        cell_ref = img['cell']
-        match = re.match(r'([A-Z]+)(\d+)', cell_ref)
-        if match:
-            img_col = column_index_from_string(match.group(1))
-            img_row = int(match.group(2))
-            max_row = max(max_row, img_row)
-            max_col = max(max_col, img_col)
-
-    # Build rows as 2D list
-    rows = []
-    for row in sheet.iter_rows(min_row=1, max_row=max_row, max_col=max_col):
-        row_values = []
-        for cell in row:
-            col_letter = get_column_letter(cell.column)
-            row_num = cell.row
-            cell_coord = f"{col_letter}{row_num}"
-
-            if cell_coord in image_dict:
-                row_values.append(image_dict[cell_coord])
-            elif cell.value is not None:
-                value = str(cell.value)
-                value = value.replace('\n', '\\n')
-
-                if cell_coord in hyperlinks:
-                    link = hyperlinks[cell_coord]
-                    parsed = parse_internal_link(link)
-                    if parsed:
-                        value = f"[{value}](→{parsed['sheet']})"
-                    else:
-                        value = f"[{value}]({link})"
-
-                row_values.append(value)
-            else:
-                row_values.append(None)
-
-        rows.append(row_values)
-
-    wb.close()
-
-    # Build images list (without internal-only fields)
-    images_list = [
-        {'cell': img['cell'], 'filename': img['filename'], 'markdown': img['markdown']}
-        for img in images
-    ]
-
-    return {
-        'sheet': sheet_name,
-        'rows': rows,
-        'images': images_list,
-        'hyperlinks': hyperlinks,
-    }
 
 
 def convert_all_sheets(excel_path: str, output_path: str = None) -> str:
@@ -716,11 +594,10 @@ def convert_file(
     excel_path: str,
     output_path: str = None,
     sheet_name: str = None,
-    output_format: str = "csv",
     quiet: bool = False
 ) -> str:
     """
-    Convert an Excel file to CSV or JSON with extracted images and hyperlinks.
+    Convert an Excel file to CSV with extracted images and hyperlinks.
 
     Main entry point for the converter. Handles file I/O and provides
     user feedback about output locations.
@@ -729,32 +606,26 @@ def convert_file(
         excel_path: Path to the .xlsx file
         output_path: Path to save output (None = print to stdout)
         sheet_name: Sheet to convert (None = ALL sheets)
-        output_format: "csv" or "json"
+        quiet: If True, suppress progress output
 
     Returns:
-        The generated output string (CSV text or JSON text)
+        The generated CSV string
 
     Side effects:
         - Creates output file at output_path (if specified)
         - Creates images/ directory with extracted images
     """
-    # If no sheet specified, convert ALL sheets (CSV only for now)
     if sheet_name is None:
         return convert_all_sheets(excel_path, output_path)
 
-    output_dir = os.path.dirname(output_path) or '.' if output_path else '.'
-
-    if output_format == "json":
-        data = excel_to_json(excel_path, sheet_name, output_dir)
-        output_string = json.dumps(data, ensure_ascii=False, indent=2)
-    else:
-        output_string = excel_to_csv(excel_path, sheet_name, output_dir)
+    output_dir = (os.path.dirname(output_path) or '.') if output_path else '.'
+    output_string = excel_to_csv(excel_path, sheet_name, output_dir)
 
     if output_path:
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(output_string)
         if not quiet:
-            print(f"Saved {output_format.upper()} to: {output_path}")
+            print(f"Saved CSV to: {output_path}")
             print(f"Images saved to: {os.path.join(output_dir, 'images')}/")
     else:
         print(output_string)
@@ -765,12 +636,10 @@ def convert_file(
 if __name__ == "__main__":
     import argparse as _argparse
 
-    _parser = _argparse.ArgumentParser(description="Convert Excel sheet to CSV or JSON")
+    _parser = _argparse.ArgumentParser(description="Convert Excel sheet to CSV")
     _parser.add_argument('excel_file', help='Input Excel file (.xlsx)')
-    _parser.add_argument('output_file', nargs='?', default=None, help='Output file path')
+    _parser.add_argument('output_file', nargs='?', default=None, help='Output CSV file path')
     _parser.add_argument('sheet_name', nargs='?', default=None, help='Sheet name (omit for all sheets)')
-    _parser.add_argument('--format', dest='output_format', choices=['csv', 'json'], default='csv',
-                         help='Output format (default: csv)')
     _args = _parser.parse_args()
 
-    convert_file(_args.excel_file, _args.output_file, _args.sheet_name, _args.output_format)
+    convert_file(_args.excel_file, _args.output_file, _args.sheet_name)

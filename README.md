@@ -115,7 +115,7 @@ Hình ảnh được lưu với tên `{sheet}_{ô}_{tên_gốc}.png` và tham ch
 ### Bước 2 — Tóm tắt (`summarize_sheets.py`)
 
 - Đọc từng file CSV, trích xuất tham chiếu hình ảnh
-- Gửi nội dung CSV + hình ảnh (base64) đến **Claude Sonnet 4.6** qua API
+- Gửi nội dung CSV + hình ảnh (base64) đến **Claude Haiku 4.5** qua API
 - Xử lý song song (mặc định 5-10 workers)
 - Prompt yêu cầu phân loại sheet, tóm tắt nội dung, trích xuất yêu cầu, giữ nguyên bảng kỹ thuật
 
@@ -135,7 +135,7 @@ Hình ảnh được lưu với tên `{sheet}_{ô}_{tên_gốc}.png` và tham ch
 
 | Bước | Model | Mục đích |
 |------|-------|----------|
-| Tóm tắt | `claude-sonnet-4-6` | Phân tích từng sheet + hình ảnh |
+| Tóm tắt | `claude-haiku-4-5-20251001` | Phân tích từng sheet + hình ảnh |
 | Tổng hợp | `claude-sonnet-4-6` | Tổng hợp BRD hoàn chỉnh |
 
 ## Chi phí & Hiệu suất
@@ -149,7 +149,8 @@ Kết quả thực nghiệm với file Excel **37 sheet**, 10 workers:
 | **Tổng** | **345,542** | **81,081** | **$2.25** |
 
 - **Thời gian:** ~12 phút (tuỳ số lượng sheet, hình ảnh, và số workers)
-- **Model:** Claude Sonnet 4.6 — $3/MTok input, $15/MTok output
+- **Model tóm tắt:** Claude Haiku 4.5 — $0.80/MTok input, $4/MTok output
+- **Model tổng hợp:** Claude Sonnet 4.6 — $3/MTok input, $15/MTok output
 - Chi tiết từng sheet: xem `output/summaries/token_report.md` sau khi chạy pipeline
 
 ## Yêu cầu

@@ -21,7 +21,6 @@ Output:
 import sys
 import os
 import csv
-import json
 import glob
 import re
 import base64
@@ -45,21 +44,8 @@ def load_prompt(filepath: Path) -> str:
         return f.read()
 
 
-def load_sheet_content(file_path: str, max_rows: int = 500) -> tuple[str, int]:
-    """Load sheet content (CSV or JSON) as text, limited to max_rows.
-
-    For JSON files, converts the rows array back into CSV-like
-    "A1: val,B1: val" format so downstream prompts and regex still work.
-    """
-    ext = Path(file_path).suffix.lower()
-
-    if ext == '.json':
-        return _load_json_as_text(file_path, max_rows)
-    return _load_csv_as_text(file_path, max_rows)
-
-
-def _load_csv_as_text(csv_path: str, max_rows: int) -> tuple[str, int]:
-    """Original CSV loading logic."""
+def load_sheet_content(csv_path: str, max_rows: int = 500) -> tuple[str, int]:
+    """Load CSV sheet content as text, limited to max_rows."""
     rows = []
     total_rows = 0
 
@@ -77,52 +63,6 @@ def _load_csv_as_text(csv_path: str, max_rows: int) -> tuple[str, int]:
     except Exception as e:
         print(f"Error reading {csv_path}: {e}")
         return "", 0
-
-
-def _load_json_as_text(json_path: str, max_rows: int) -> tuple[str, int]:
-    """Load JSON sheet file and flatten to CSV-like text.
-
-    Produces the same "A1: value,B1: value" format that the CSV path uses,
-    so summarization prompts and image-reference regex keep working.
-    """
-    try:
-        with open(json_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-
-        sheet_name = data.get('sheet', Path(json_path).stem)
-        json_rows = data.get('rows', [])
-        total_rows = len(json_rows)
-
-        lines = [f"Sheet: {sheet_name}"]
-        for row_idx, row in enumerate(json_rows):
-            if row_idx >= max_rows:
-                break
-            cells = []
-            for col_idx, value in enumerate(row):
-                col_letter = _col_letter(col_idx + 1)
-                cell_coord = f"{col_letter}{row_idx + 1}"
-                if value is not None:
-                    cells.append(f"{cell_coord}: {value}")
-                else:
-                    cells.append(f"{cell_coord}:")
-            lines.append(','.join(cells))
-
-        content = '\n'.join(lines)
-        if total_rows > max_rows:
-            content += f"\n\n... ({total_rows - max_rows} more rows truncated)"
-        return content, total_rows
-    except Exception as e:
-        print(f"Error reading {json_path}: {e}")
-        return "", 0
-
-
-def _col_letter(col_num: int) -> str:
-    """Convert 1-based column number to Excel column letter (1->A, 27->AA)."""
-    result = ""
-    while col_num > 0:
-        col_num, remainder = divmod(col_num - 1, 26)
-        result = chr(65 + remainder) + result
-    return result
 
 
 def extract_image_references(csv_content: str) -> list[dict]:
@@ -236,13 +176,11 @@ def summarize_sheet(client: Anthropic, sheet_name: str, csv_path: str,
         return f"# {sheet_name}\n\n*Error generating summary: {e}*", empty_usage
 
 
-def process_sheet(csv_path: str, output_dir: str, images_dir: str, api_key: str,
+def process_sheet(csv_path: str, output_dir: str, images_dir: str, client: Anthropic,
                   index: int, total: int) -> dict:
     """Process a single sheet - worker function."""
     sheet_name = Path(csv_path).stem
     output_md = os.path.join(output_dir, f"{sheet_name}.md")
-
-    client = Anthropic(api_key=api_key)
 
     try:
         summary, usage = summarize_sheet(client, sheet_name, csv_path, images_dir)
@@ -301,13 +239,10 @@ def summarize_all_sheets(sheets_dir: str, output_dir: str, api_key: str,
                          max_workers: int = 5, images_dir: str = None) -> dict:
     """Summarize all CSV sheets using parallel processing."""
     os.makedirs(output_dir, exist_ok=True)
-    sheet_files = sorted(
-        glob.glob(os.path.join(sheets_dir, "*.csv")) +
-        glob.glob(os.path.join(sheets_dir, "*.json"))
-    )
+    sheet_files = sorted(glob.glob(os.path.join(sheets_dir, "*.csv")))
 
     if not sheet_files:
-        print(f"No CSV/JSON files found in {sheets_dir}")
+        print(f"No CSV files found in {sheets_dir}")
         return {'success': [], 'failed': []}
 
     total = len(sheet_files)
@@ -316,9 +251,11 @@ def summarize_all_sheets(sheets_dir: str, output_dir: str, api_key: str,
     results = {'success': [], 'failed': []}
     all_sheet_results = []
 
+    client = Anthropic(api_key=api_key)
+
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {
-            executor.submit(process_sheet, sf, output_dir, images_dir, api_key,
+            executor.submit(process_sheet, sf, output_dir, images_dir, client,
                           i+1, total): sf
             for i, sf in enumerate(sheet_files)
         }
