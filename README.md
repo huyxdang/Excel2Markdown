@@ -115,7 +115,7 @@ Hình ảnh được lưu với tên `{sheet}_{ô}_{tên_gốc}.png` và tham ch
 ### Bước 2 — Tóm tắt (`summarize_sheets.py`)
 
 - Đọc từng file CSV, trích xuất tham chiếu hình ảnh
-- Gửi nội dung CSV + hình ảnh (base64) đến **Claude Sonnet** qua API
+- Gửi nội dung CSV + hình ảnh (base64) đến **Claude Sonnet 4.6** qua API
 - Xử lý song song (mặc định 5-10 workers)
 - Prompt yêu cầu phân loại sheet, tóm tắt nội dung, trích xuất yêu cầu, giữ nguyên bảng kỹ thuật
 
@@ -123,7 +123,7 @@ Hình ảnh được lưu với tên `{sheet}_{ô}_{tên_gốc}.png` và tham ch
 
 ### Bước 3 — Tổng hợp (`brd_synthesize.py`)
 
-- Gộp tất cả file summary và gửi đến **Claude Opus** (streaming)
+- Gộp tất cả file summary và gửi đến **Claude Sonnet 4.6** (streaming)
 - Tạo BRD hoàn chỉnh với: Mục lục, Executive Summary, Business Requirements, v.v.
 - Ghép cặp sheet (a = giao diện, b = đặc tả) thành section duy nhất
 - Chuyển token `<<IMAGE:filename>>` thành cú pháp Markdown image
@@ -135,12 +135,22 @@ Hình ảnh được lưu với tên `{sheet}_{ô}_{tên_gốc}.png` và tham ch
 
 | Bước | Model | Mục đích |
 |------|-------|----------|
-| Tóm tắt | `claude-sonnet-4-20250514` | Phân tích từng sheet + hình ảnh |
-| Tổng hợp | `claude-opus-4-5` | Tổng hợp BRD hoàn chỉnh |
+| Tóm tắt | `claude-sonnet-4-6` | Phân tích từng sheet + hình ảnh |
+| Tổng hợp | `claude-sonnet-4-6` | Tổng hợp BRD hoàn chỉnh |
 
-## Hiệu suất tham khảo
+## Chi phí & Hiệu suất
 
-Với file Excel 37 sheet: khoảng **17 phút** (tuỳ thuộc số lượng sheet, hình ảnh, và số workers).
+Kết quả thực nghiệm với file Excel **37 sheet**, 10 workers:
+
+| Bước | Input Tokens | Output Tokens | Chi phí |
+|------|-------------|--------------|---------|
+| Tóm tắt (37 sheet) | 277,340 | 57,378 | $1.69 |
+| Tổng hợp BRD | 68,202 | 23,703 | $0.56 |
+| **Tổng** | **345,542** | **81,081** | **$2.25** |
+
+- **Thời gian:** ~12 phút (tuỳ số lượng sheet, hình ảnh, và số workers)
+- **Model:** Claude Sonnet 4.6 — $3/MTok input, $15/MTok output
+- Chi tiết từng sheet: xem `output/summaries/token_report.md` sau khi chạy pipeline
 
 ## Yêu cầu
 

@@ -38,6 +38,7 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter, column_index_from_string
 from zipfile import ZipFile
 import xml.etree.ElementTree as ET
+import json
 import sys
 import os
 import re
@@ -544,6 +545,101 @@ def excel_to_csv(excel_path: str, sheet_name: str = None, output_dir: str = '.')
     return '\n'.join(csv_lines)
 
 
+def excel_to_json(excel_path: str, sheet_name: str = None, output_dir: str = '.') -> dict:
+    """
+    Convert an Excel worksheet to a JSON-friendly dict.
+
+    Same extraction logic as excel_to_csv() but outputs a compact structure:
+    - rows: 2D list of values (null for empty cells), with image/hyperlink
+      markdown inlined just like CSV.
+    - images: list of {cell, filename, markdown} for downstream use.
+    - hyperlinks: dict mapping cell ref to link target.
+
+    Args:
+        excel_path: Path to the .xlsx file
+        sheet_name: Name of sheet to convert (None = first/active sheet)
+        output_dir: Directory to save extracted images
+
+    Returns:
+        dict with keys: sheet, rows, images, hyperlinks
+    """
+    wb = load_workbook(excel_path, data_only=True)
+
+    if sheet_name:
+        sheet = wb[sheet_name]
+    else:
+        sheet = wb.active
+        sheet_name = sheet.title
+
+    wb.close()
+
+    # Extract images and hyperlinks (same as CSV path)
+    images = extract_images(excel_path, sheet_name, output_dir)
+    image_dict = {img['cell']: img['markdown'] for img in images}
+    hyperlinks = extract_hyperlinks(excel_path, sheet_name)
+
+    # Reload for data extraction
+    wb = load_workbook(excel_path, data_only=True)
+    sheet = wb[sheet_name]
+
+    # Calculate max row/col including image positions
+    max_row = sheet.max_row
+    max_col = sheet.max_column
+
+    for img in images:
+        cell_ref = img['cell']
+        match = re.match(r'([A-Z]+)(\d+)', cell_ref)
+        if match:
+            img_col = column_index_from_string(match.group(1))
+            img_row = int(match.group(2))
+            max_row = max(max_row, img_row)
+            max_col = max(max_col, img_col)
+
+    # Build rows as 2D list
+    rows = []
+    for row in sheet.iter_rows(min_row=1, max_row=max_row, max_col=max_col):
+        row_values = []
+        for cell in row:
+            col_letter = get_column_letter(cell.column)
+            row_num = cell.row
+            cell_coord = f"{col_letter}{row_num}"
+
+            if cell_coord in image_dict:
+                row_values.append(image_dict[cell_coord])
+            elif cell.value is not None:
+                value = str(cell.value)
+                value = value.replace('\n', '\\n')
+
+                if cell_coord in hyperlinks:
+                    link = hyperlinks[cell_coord]
+                    parsed = parse_internal_link(link)
+                    if parsed:
+                        value = f"[{value}](→{parsed['sheet']})"
+                    else:
+                        value = f"[{value}]({link})"
+
+                row_values.append(value)
+            else:
+                row_values.append(None)
+
+        rows.append(row_values)
+
+    wb.close()
+
+    # Build images list (without internal-only fields)
+    images_list = [
+        {'cell': img['cell'], 'filename': img['filename'], 'markdown': img['markdown']}
+        for img in images
+    ]
+
+    return {
+        'sheet': sheet_name,
+        'rows': rows,
+        'images': images_list,
+        'hyperlinks': hyperlinks,
+    }
+
+
 def convert_all_sheets(excel_path: str, output_path: str = None) -> str:
     """
     Convert ALL sheets in an Excel workbook to a single CSV file.
@@ -619,57 +715,62 @@ def convert_all_sheets(excel_path: str, output_path: str = None) -> str:
 def convert_file(
     excel_path: str,
     output_path: str = None,
-    sheet_name: str = None
+    sheet_name: str = None,
+    output_format: str = "csv",
+    quiet: bool = False
 ) -> str:
     """
-    Convert an Excel file to CSV with extracted images and hyperlinks.
-    
+    Convert an Excel file to CSV or JSON with extracted images and hyperlinks.
+
     Main entry point for the converter. Handles file I/O and provides
     user feedback about output locations.
-    
+
     Args:
         excel_path: Path to the .xlsx file
-        output_path: Path to save CSV (None = print to stdout)
+        output_path: Path to save output (None = print to stdout)
         sheet_name: Sheet to convert (None = ALL sheets)
-        
+        output_format: "csv" or "json"
+
     Returns:
-        The generated CSV string
-        
+        The generated output string (CSV text or JSON text)
+
     Side effects:
-        - Creates CSV file at output_path (if specified)
+        - Creates output file at output_path (if specified)
         - Creates images/ directory with extracted images
     """
-    # If no sheet specified, convert ALL sheets
+    # If no sheet specified, convert ALL sheets (CSV only for now)
     if sheet_name is None:
         return convert_all_sheets(excel_path, output_path)
-    
+
     output_dir = os.path.dirname(output_path) or '.' if output_path else '.'
-    
-    csv_string = excel_to_csv(excel_path, sheet_name, output_dir)
-    
+
+    if output_format == "json":
+        data = excel_to_json(excel_path, sheet_name, output_dir)
+        output_string = json.dumps(data, ensure_ascii=False, indent=2)
+    else:
+        output_string = excel_to_csv(excel_path, sheet_name, output_dir)
+
     if output_path:
         with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(csv_string)
-        print(f"Saved CSV to: {output_path}")
-        print(f"Images saved to: {os.path.join(output_dir, 'images')}/")
+            f.write(output_string)
+        if not quiet:
+            print(f"Saved {output_format.upper()} to: {output_path}")
+            print(f"Images saved to: {os.path.join(output_dir, 'images')}/")
     else:
-        print(csv_string)
-    
-    return csv_string
+        print(output_string)
+
+    return output_string
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print(__doc__)
-        print("\nUsage:")
-        print("  python sheet_converter.py <excel_file> [output_csv] [sheet_name]")
-        print("\nExamples:")
-        print("  python sheet_converter.py input.xlsx output.csv          # All sheets")
-        print("  python sheet_converter.py input.xlsx output.csv '5.1.1a' # Single sheet")
-        sys.exit(1)
-    
-    excel_file = sys.argv[1]
-    output_file = sys.argv[2] if len(sys.argv) > 2 else None
-    sheet = sys.argv[3] if len(sys.argv) > 3 else None
-    
-    convert_file(excel_file, output_file, sheet)
+    import argparse as _argparse
+
+    _parser = _argparse.ArgumentParser(description="Convert Excel sheet to CSV or JSON")
+    _parser.add_argument('excel_file', help='Input Excel file (.xlsx)')
+    _parser.add_argument('output_file', nargs='?', default=None, help='Output file path')
+    _parser.add_argument('sheet_name', nargs='?', default=None, help='Sheet name (omit for all sheets)')
+    _parser.add_argument('--format', dest='output_format', choices=['csv', 'json'], default='csv',
+                         help='Output format (default: csv)')
+    _args = _parser.parse_args()
+
+    convert_file(_args.excel_file, _args.output_file, _args.sheet_name, _args.output_format)

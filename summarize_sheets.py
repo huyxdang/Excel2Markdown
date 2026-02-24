@@ -21,6 +21,7 @@ Output:
 import sys
 import os
 import csv
+import json
 import glob
 import re
 import base64
@@ -34,24 +35,41 @@ load_dotenv()
 
 SCRIPT_DIR = Path(__file__).parent
 
+# Pricing per million tokens (USD) - Haiku 4.5
+HAIKU_INPUT_COST = 0.80    # $0.80 / MTok
+HAIKU_OUTPUT_COST = 4.0    # $4 / MTok
+
 
 def load_prompt(filepath: Path) -> str:
     with open(filepath, 'r', encoding='utf-8') as f:
         return f.read()
 
 
-def load_csv_content(csv_path: str, max_rows: int = 500) -> tuple[str, int]:
-    """Load CSV content as text, limited to max_rows."""
+def load_sheet_content(file_path: str, max_rows: int = 500) -> tuple[str, int]:
+    """Load sheet content (CSV or JSON) as text, limited to max_rows.
+
+    For JSON files, converts the rows array back into CSV-like
+    "A1: val,B1: val" format so downstream prompts and regex still work.
+    """
+    ext = Path(file_path).suffix.lower()
+
+    if ext == '.json':
+        return _load_json_as_text(file_path, max_rows)
+    return _load_csv_as_text(file_path, max_rows)
+
+
+def _load_csv_as_text(csv_path: str, max_rows: int) -> tuple[str, int]:
+    """Original CSV loading logic."""
     rows = []
     total_rows = 0
-    
+
     try:
         with open(csv_path, 'r', encoding='utf-8') as f:
             for i, row in enumerate(csv.reader(f)):
                 total_rows += 1
                 if i < max_rows:
                     rows.append(','.join(row))
-        
+
         content = '\n'.join(rows)
         if total_rows > max_rows:
             content += f"\n\n... ({total_rows - max_rows} more rows truncated)"
@@ -59,6 +77,52 @@ def load_csv_content(csv_path: str, max_rows: int = 500) -> tuple[str, int]:
     except Exception as e:
         print(f"Error reading {csv_path}: {e}")
         return "", 0
+
+
+def _load_json_as_text(json_path: str, max_rows: int) -> tuple[str, int]:
+    """Load JSON sheet file and flatten to CSV-like text.
+
+    Produces the same "A1: value,B1: value" format that the CSV path uses,
+    so summarization prompts and image-reference regex keep working.
+    """
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        sheet_name = data.get('sheet', Path(json_path).stem)
+        json_rows = data.get('rows', [])
+        total_rows = len(json_rows)
+
+        lines = [f"Sheet: {sheet_name}"]
+        for row_idx, row in enumerate(json_rows):
+            if row_idx >= max_rows:
+                break
+            cells = []
+            for col_idx, value in enumerate(row):
+                col_letter = _col_letter(col_idx + 1)
+                cell_coord = f"{col_letter}{row_idx + 1}"
+                if value is not None:
+                    cells.append(f"{cell_coord}: {value}")
+                else:
+                    cells.append(f"{cell_coord}:")
+            lines.append(','.join(cells))
+
+        content = '\n'.join(lines)
+        if total_rows > max_rows:
+            content += f"\n\n... ({total_rows - max_rows} more rows truncated)"
+        return content, total_rows
+    except Exception as e:
+        print(f"Error reading {json_path}: {e}")
+        return "", 0
+
+
+def _col_letter(col_num: int) -> str:
+    """Convert 1-based column number to Excel column letter (1->A, 27->AA)."""
+    result = ""
+    while col_num > 0:
+        col_num, remainder = divmod(col_num - 1, 26)
+        result = chr(65 + remainder) + result
+    return result
 
 
 def extract_image_references(csv_content: str) -> list[dict]:
@@ -96,17 +160,23 @@ def load_image_as_base64(image_path: str):
         return None
 
 
-def summarize_sheet(client: Anthropic, sheet_name: str, csv_path: str, 
-                    images_dir: str = None, max_tokens: int = 3000) -> str:
-    """Use Claude API to summarize a single sheet with optional image analysis."""
-    content, row_count = load_csv_content(csv_path)
+def summarize_sheet(client: Anthropic, sheet_name: str, csv_path: str,
+                    images_dir: str = None, max_tokens: int = 3000) -> tuple[str, dict]:
+    """Use Claude API to summarize a single sheet with optional image analysis.
+
+    Returns:
+        (summary_text, usage_dict) where usage_dict has input_tokens and output_tokens.
+    """
+    empty_usage = {'input_tokens': 0, 'output_tokens': 0}
+
+    content, row_count = load_sheet_content(csv_path)
     if not content:
-        return f"# {sheet_name}\n\n*Error: Could not read sheet content*"
-    
+        return f"# {sheet_name}\n\n*Error: Could not read sheet content*", empty_usage
+
     images = extract_image_references(content)
     prompt_template = load_prompt(SCRIPT_DIR / "prompts" / "summarization_prompt.md")
     prompt = prompt_template.format(sheet_name=sheet_name, content=content)
-    
+
     # Load actual images if available
     loaded_images = []
     if images_dir and images:
@@ -120,15 +190,15 @@ def summarize_sheet(client: Anthropic, sheet_name: str, csv_path: str,
                         'cell': img['cell'], 'markdown': img['markdown'],
                         'filename': filename, 'base64': image_data[0], 'media_type': image_data[1]
                     })
-    
+
     # Build message content
     message_content = []
-    
+
     if loaded_images:
         prompt += f"\n\n**HÌNH ẢNH ĐÍNH KÈM:** Sheet này có {len(loaded_images)} hình ảnh. Hãy phân tích từng hình ảnh.\n"
         for i, img in enumerate(loaded_images, 1):
             prompt += f"Hình {i} (Cell {img['cell']}): `{img['markdown']}`\n"
-        
+
         message_content.append({"type": "text", "text": prompt})
         for img in loaded_images:
             message_content.append({
@@ -137,15 +207,19 @@ def summarize_sheet(client: Anthropic, sheet_name: str, csv_path: str,
             })
     else:
         message_content.append({"type": "text", "text": prompt})
-    
+
     try:
         response = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-haiku-4-5-20251001",
             max_tokens=max_tokens,
             messages=[{"role": "user", "content": message_content}]
         )
         summary = response.content[0].text
-        
+        usage = {
+            'input_tokens': response.usage.input_tokens,
+            'output_tokens': response.usage.output_tokens,
+        }
+
         # Append guaranteed image reference section
         if images:
             summary += "\n\n## 10. Danh sách hình ảnh (trích xuất tự động)\n\n"
@@ -153,59 +227,117 @@ def summarize_sheet(client: Anthropic, sheet_name: str, csv_path: str,
                 match = re.search(r'\(images/([^)]+)\)', img['markdown'])
                 if match:
                     summary += f"- Cell {img['cell']}: `<<IMAGE:{match.group(1)}>>`\n"
-        
-        summary += f"\n\n---\n*Source: {sheet_name}.csv | Rows: {row_count} | Images analyzed: {len(loaded_images)}*\n"
-        return summary
-        
+
+        source_ext = Path(csv_path).suffix
+        summary += f"\n\n---\n*Source: {sheet_name}{source_ext} | Rows: {row_count} | Images analyzed: {len(loaded_images)}*\n"
+        return summary, usage
+
     except Exception as e:
-        return f"# {sheet_name}\n\n*Error generating summary: {e}*"
+        return f"# {sheet_name}\n\n*Error generating summary: {e}*", empty_usage
 
 
-def process_sheet(csv_path: str, output_dir: str, images_dir: str, api_key: str, index: int, total: int) -> dict:
+def process_sheet(csv_path: str, output_dir: str, images_dir: str, api_key: str,
+                  index: int, total: int) -> dict:
     """Process a single sheet - worker function."""
     sheet_name = Path(csv_path).stem
     output_md = os.path.join(output_dir, f"{sheet_name}.md")
-    
+
     client = Anthropic(api_key=api_key)
-    
+
     try:
-        summary = summarize_sheet(client, sheet_name, csv_path, images_dir)
+        summary, usage = summarize_sheet(client, sheet_name, csv_path, images_dir)
         with open(output_md, 'w', encoding='utf-8') as f:
             f.write(summary)
-        
+
         size = os.path.getsize(output_md)
-        print(f"[{index}/{total}] ✓ '{sheet_name}' ({size:,} bytes)")
-        return {'status': 'success', 'sheet_name': sheet_name, 'size': size}
+        in_tok = usage['input_tokens']
+        out_tok = usage['output_tokens']
+        print(f"[{index}/{total}] ✓ '{sheet_name}' ({size:,} bytes | {in_tok:,}+{out_tok:,} tokens)")
+        return {'status': 'success', 'sheet_name': sheet_name, 'size': size,
+                'input_tokens': in_tok, 'output_tokens': out_tok}
     except Exception as e:
         print(f"[{index}/{total}] ✗ '{sheet_name}' - {e}")
-        return {'status': 'failed', 'sheet_name': sheet_name, 'error': str(e)}
+        return {'status': 'failed', 'sheet_name': sheet_name, 'error': str(e),
+                'input_tokens': 0, 'output_tokens': 0}
 
 
-def summarize_all_sheets(sheets_dir: str, output_dir: str, api_key: str, 
+def _compute_cost(r: dict) -> float:
+    """Compute cost for a single sheet result using Haiku pricing."""
+    return (
+        r['input_tokens'] * HAIKU_INPUT_COST +
+        r['output_tokens'] * HAIKU_OUTPUT_COST
+    ) / 1_000_000
+
+
+def _write_token_report(output_dir: str, sheet_results: list[dict]) -> str:
+    """Write token usage report as markdown table. Returns report path."""
+    report_path = os.path.join(output_dir, 'token_report.md')
+
+    total_in = sum(r['input_tokens'] for r in sheet_results)
+    total_out = sum(r['output_tokens'] for r in sheet_results)
+    total_cost = sum(_compute_cost(r) for r in sheet_results)
+
+    lines = [
+        "# Token Usage Report\n",
+        "## Summarization (claude-haiku-4.5)\n",
+        "| Sheet | Input Tokens | Output Tokens | Cost ($) |",
+        "|-------|-------------|--------------|----------|",
+    ]
+
+    for r in sorted(sheet_results, key=lambda x: x['sheet_name']):
+        cost = _compute_cost(r)
+        lines.append(f"| {r['sheet_name']} | {r['input_tokens']:,} | {r['output_tokens']:,} | {cost:.4f} |")
+
+    lines.append(f"| **Total** | **{total_in:,}** | **{total_out:,}** | **{total_cost:.4f}** |")
+    lines.append("")
+
+    with open(report_path, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(lines) + '\n')
+
+    return report_path
+
+
+def summarize_all_sheets(sheets_dir: str, output_dir: str, api_key: str,
                          max_workers: int = 5, images_dir: str = None) -> dict:
     """Summarize all CSV sheets using parallel processing."""
     os.makedirs(output_dir, exist_ok=True)
-    csv_files = sorted(glob.glob(os.path.join(sheets_dir, "*.csv")))
-    
-    if not csv_files:
-        print(f"No CSV files found in {sheets_dir}")
+    sheet_files = sorted(
+        glob.glob(os.path.join(sheets_dir, "*.csv")) +
+        glob.glob(os.path.join(sheets_dir, "*.json"))
+    )
+
+    if not sheet_files:
+        print(f"No CSV/JSON files found in {sheets_dir}")
         return {'success': [], 'failed': []}
-    
-    total = len(csv_files)
+
+    total = len(sheet_files)
     print(f"Processing {total} sheets with {max_workers} workers\n" + "-" * 40)
-    
+
     results = {'success': [], 'failed': []}
-    
+    all_sheet_results = []
+
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {
-            executor.submit(process_sheet, csv, output_dir, images_dir, api_key, i+1, total): csv
-            for i, csv in enumerate(csv_files)
+            executor.submit(process_sheet, sf, output_dir, images_dir, api_key,
+                          i+1, total): sf
+            for i, sf in enumerate(sheet_files)
         }
-        
+
         for future in as_completed(futures):
             result = future.result()
+            all_sheet_results.append(result)
             results['success' if result['status'] == 'success' else 'failed'].append(result['sheet_name'])
-    
+
+    # Write token usage report
+    successful = [r for r in all_sheet_results if r['status'] == 'success']
+    if successful:
+        report_path = _write_token_report(output_dir, successful)
+        total_cost = sum(_compute_cost(r) for r in successful)
+        total_in = sum(r['input_tokens'] for r in successful)
+        total_out = sum(r['output_tokens'] for r in successful)
+        print(f"\n📊 Tokens: {total_in:,} in + {total_out:,} out = ${total_cost:.4f}")
+        print(f"📄 Report: {report_path}")
+
     return results
 
 

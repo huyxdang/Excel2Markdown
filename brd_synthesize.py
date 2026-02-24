@@ -22,6 +22,10 @@ load_dotenv()
 
 SCRIPT_DIR = Path(__file__).parent
 
+# Pricing per million tokens (USD) - Sonnet 4.6
+SYNTH_INPUT_COST = 3.0   # $3 / MTok
+SYNTH_OUTPUT_COST = 15.0 # $15 / MTok
+
 
 def load_prompt(filepath: Path) -> str:
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -34,7 +38,7 @@ def load_all_summaries(summaries_dir: str) -> dict:
     md_files = sorted(glob.glob(os.path.join(summaries_dir, "*.md")))
     
     for md_path in md_files:
-        if md_path.endswith("_index.md"):
+        if md_path.endswith("_index.md") or md_path.endswith("token_report.md"):
             continue
         sheet_name = Path(md_path).stem
         try:
@@ -105,24 +109,30 @@ def append_missing_images(brd_content: str, missing: list) -> str:
     return brd_content + appendix
 
 
-def synthesize_brd(client: Anthropic, summaries: dict, max_tokens: int = 32000) -> str:
-    """Synthesize all summaries into a final BRD using Claude."""
+def synthesize_brd(client: Anthropic, summaries: dict, max_tokens: int = 32000) -> tuple[str, dict]:
+    """Synthesize all summaries into a final BRD using Claude.
+
+    Returns:
+        (brd_content, usage_dict) where usage_dict has input_tokens and output_tokens.
+    """
+    empty_usage = {'input_tokens': 0, 'output_tokens': 0}
+
     if not summaries:
-        return "# Error\n\nNo summaries provided for synthesis."
-    
+        return "# Error\n\nNo summaries provided for synthesis.", empty_usage
+
     system_prompt = load_prompt(SCRIPT_DIR / "prompts" / "system_prompt.md")
     user_template = load_prompt(SCRIPT_DIR / "prompts" / "user_prompt.md")
-    
+
     summaries_text = combine_summaries(summaries)
     user_prompt = user_template.format(num_sheets=len(summaries), summaries=summaries_text)
-    
+
     print(f"Synthesizing {len(summaries)} sheets ({len(summaries_text):,} chars)...")
     print("Generating BRD (streaming)...", end="", flush=True)
-    
+
     try:
         brd_content = ""
         with client.messages.stream(
-            model="claude-opus-4-5",
+            model="claude-sonnet-4-6",
             max_tokens=max_tokens,
             system=system_prompt,
             messages=[{"role": "user", "content": user_prompt}]
@@ -130,27 +140,37 @@ def synthesize_brd(client: Anthropic, summaries: dict, max_tokens: int = 32000) 
             for text in stream.text_stream:
                 brd_content += text
                 print(".", end="", flush=True)
+
+            # Get token usage from the final message
+            final_message = stream.get_final_message()
+            usage = {
+                'input_tokens': final_message.usage.input_tokens,
+                'output_tokens': final_message.usage.output_tokens,
+            }
         print(" Done!")
-        
+
         # Process images
         valid_filenames = extract_valid_image_filenames(summaries)
         brd_tokens = set(re.findall(r'<<IMAGE:([^>]+)>>', brd_content))
         missing = list(valid_filenames - brd_tokens)
-        
+
         brd_content, stats = convert_image_tokens(brd_content, valid_filenames)
         print(f"Images: {stats['converted']} converted, {stats['invalid_removed']} invalid, {len(missing)} missing")
-        
+
         if missing:
             brd_content = append_missing_images(brd_content, missing)
-        
+
         # Add metadata
         image_count = len(re.findall(r'!\[[^\]]*\]\(images/[^)]+\)', brd_content))
         brd_content += f"\n\n---\n\n*Generated from {len(summaries)} sheets | Images: {image_count}*\n"
-        
-        return brd_content
-        
+
+        cost = (usage['input_tokens'] * SYNTH_INPUT_COST + usage['output_tokens'] * SYNTH_OUTPUT_COST) / 1_000_000
+        print(f"📊 Synthesis tokens: {usage['input_tokens']:,} input + {usage['output_tokens']:,} output = ${cost:.4f}")
+
+        return brd_content, usage
+
     except Exception as e:
-        return f"# Error Generating BRD\n\n{e}"
+        return f"# Error Generating BRD\n\n{e}", empty_usage
 
 
 def main():
@@ -173,17 +193,47 @@ def main():
         sys.exit("Error: No summaries found")
     
     print(f"Loaded {len(summaries)} summaries")
-    
+
     client = Anthropic(api_key=api_key)
-    brd_content = synthesize_brd(client, summaries, args.max_tokens)
-    
+    brd_content, usage = synthesize_brd(client, summaries, args.max_tokens)
+
     output_dir = os.path.dirname(args.output_file)
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
-    
+
     with open(args.output_file, 'w', encoding='utf-8') as f:
         f.write(brd_content)
-    
+
+    # Append synthesis cost to token_report.md if it exists
+    report_path = os.path.join(args.summaries_dir, 'token_report.md')
+    if os.path.exists(report_path) and usage['input_tokens'] > 0:
+        synth_cost = (usage['input_tokens'] * SYNTH_INPUT_COST + usage['output_tokens'] * SYNTH_OUTPUT_COST) / 1_000_000
+
+        # Read existing report to compute grand total
+        with open(report_path, 'r', encoding='utf-8') as f:
+            existing = f.read()
+
+        # Parse summarization total cost from the last table row
+        summ_cost = 0.0
+        for line in existing.splitlines():
+            if line.startswith('| **Total**'):
+                parts = line.split('|')
+                try:
+                    summ_cost = float(parts[-2].strip().strip('*'))
+                except (ValueError, IndexError):
+                    pass
+
+        grand_total = summ_cost + synth_cost
+
+        with open(report_path, 'a', encoding='utf-8') as f:
+            f.write("\n## Synthesis (claude-sonnet-4.6)\n\n")
+            f.write("| Step | Input Tokens | Output Tokens | Cost ($) |\n")
+            f.write("|------|-------------|--------------|----------|\n")
+            f.write(f"| BRD synthesis | {usage['input_tokens']:,} | {usage['output_tokens']:,} | {synth_cost:.4f} |\n")
+            f.write(f"\n## Grand Total: ${grand_total:.4f}\n")
+
+        print(f"📄 Updated: {report_path}")
+
     print(f"✅ Done: {args.output_file} ({os.path.getsize(args.output_file):,} bytes)")
 
 
