@@ -104,11 +104,12 @@ def main():
         if not success:
             sys.exit(1)
     
-    # Step 3: Synthesize
+    # Step 3: Synthesize (two-pass: parallel Haiku modules → Sonnet final)
     success, timings['synthesize'] = run_command(
         [sys.executable, str(script_dir / 'brd_synthesize.py'),
          str(summaries_dir), str(final_brd_path),
-         '--api-key', api_key, '--max-tokens', str(args.max_tokens)],
+         '--api-key', api_key, '--max-tokens', str(args.max_tokens),
+         '--workers', str(args.workers)],
         "Step 3/3: Synthesizing BRD"
     )
     if not success:
