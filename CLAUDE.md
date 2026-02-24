@@ -24,7 +24,8 @@ Excel (.xlsx) → Step 1: extract → CSV + images → Step 2: summarize → per
 ```
 main.py                  — Pipeline orchestrator (runs steps 1-3 as subprocesses)
 extract_all_sheets.py    — Step 1: discovers sheets, dispatches parallel extraction
-sheet_converter.py       — Step 1 core: Excel → sparse CSV, image extraction, hyperlinks
+sheet_converter.py       — Step 1 core: Excel → sparse CSV, hyperlinks
+image_extractor.py       — Step 1 core: extract images from .xlsx via ZIP/XML parsing
 summarize_sheets.py      — Step 2: parallel Claude API summarization
 brd_synthesize.py        — Step 3: streaming synthesis into final BRD
 prompts/

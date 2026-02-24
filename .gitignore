@@ -39,6 +39,9 @@ wheels/
 *.swo
 *~
 
+# Generated output (re-created by pipeline)
+output/
+
 # OS
 .DS_Store
 Thumbs.db

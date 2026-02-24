@@ -2,25 +2,11 @@
 BRD Sheet Converter - Excel Sheet to Markdown-ready CSV
 
 Converts Excel worksheets to CSV format with cell coordinates, markdown image
-references, and hyperlink extraction. Designed for LLM processing pipelines 
+references, and hyperlink extraction. Designed for LLM processing pipelines
 that need structured data with embedded image links and sheet relationships.
 
-Why this exists:
-    Excel stores images separately from cell data in its internal XML structure.
-    The openpyxl library doesn't reliably load images, so this module directly
-    parses the underlying XML within the .xlsx ZIP archive to extract:
-    - Image positions (which cell they're anchored to)
-    - Image files (extracted to a local folder)
-    - Markdown references (for rendering in documentation)
-    - Hyperlinks (internal sheet links and external URLs)
-
-Excel .xlsx structure:
-    .xlsx files are ZIP archives containing:
-    ├── xl/
-    │   ├── worksheets/sheet1.xml    # Cell data (text, numbers, formulas)
-    │   ├── drawings/drawing1.xml    # Image anchor positions
-    │   ├── drawings/_rels/*.rels    # Maps rId -> image filename
-    │   └── media/image1.png         # Actual image files
+Image extraction is handled by image_extractor.py, which parses the .xlsx
+ZIP archive's internal XML to locate and extract embedded images.
 
 Usage:
     python sheet_converter.py <excel_file> [output_csv] [sheet_name]
@@ -36,41 +22,12 @@ Output:
 
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter, column_index_from_string
-from zipfile import ZipFile
-import xml.etree.ElementTree as ET
 import sys
 import os
 import re
 from typing import Optional, Dict, List
 
-
-# XML namespaces used in Office Open XML (OOXML) drawing files
-NAMESPACES = {
-    'xdr': 'http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing',
-    'a': 'http://schemas.openxmlformats.org/drawingml/2006/main',
-    'r': 'http://schemas.openxmlformats.org/officeDocument/2006/relationships',
-    'rel': 'http://schemas.openxmlformats.org/package/2006/relationships',
-}
-
-
-# ---------------------------------------------------------------------------
-# Internal helpers that operate on already-open openpyxl objects.
-# These avoid redundant load_workbook() calls when the caller already has
-# a workbook/sheet open.
-# ---------------------------------------------------------------------------
-
-def _get_drawing_path_from_sheet(sheet) -> Optional[str]:
-    """Extract drawing XML path from an already-open worksheet."""
-    if hasattr(sheet, '_rels') and sheet._rels:
-        for rel in sheet._rels:
-            if 'drawing' in rel.Target.lower():
-                drawing_path = rel.Target
-                if drawing_path.startswith('..'):
-                    drawing_path = 'xl' + drawing_path[2:]
-                elif not drawing_path.startswith('xl/'):
-                    drawing_path = 'xl/drawings/' + drawing_path.split('/')[-1]
-                return drawing_path
-    return None
+from image_extractor import _get_drawing_path_from_sheet, extract_images_from_drawing
 
 
 def _extract_hyperlinks_from_sheet(sheet) -> Dict[str, str]:
@@ -96,209 +53,6 @@ def _extract_hyperlinks_from_sheet(sheet) -> Dict[str, str]:
                         hyperlinks[cell_ref] = cell.hyperlink.target
 
     return hyperlinks
-
-
-def get_sheet_drawing_path(excel_path: str, sheet_name: str) -> Optional[str]:
-    """
-    Find the drawing XML path associated with a specific worksheet.
-    
-    Each Excel sheet can have an associated drawing file that contains
-    image position information. This function looks up the relationship
-    between the sheet and its drawing file.
-    
-    Args:
-        excel_path: Path to the .xlsx file
-        sheet_name: Name of the worksheet to look up
-        
-    Returns:
-        Path to the drawing XML file within the ZIP archive
-        (e.g., 'xl/drawings/drawing2.xml'), or None if no drawing exists
-        
-    Example:
-        >>> get_sheet_drawing_path('report.xlsx', 'Sheet1')
-        'xl/drawings/drawing1.xml'
-    """
-    wb = load_workbook(excel_path, data_only=False)
-    sheet = wb[sheet_name]
-    drawing_path = _get_drawing_path_from_sheet(sheet)
-    wb.close()
-    return drawing_path
-
-
-def process_anchor(
-    anchor: ET.Element,
-    rels: Dict[str, str],
-    zf: ZipFile,
-    images_dir: str,
-    sheet_name: str
-) -> Optional[Dict]:
-    """
-    Process a single image anchor element and extract the image file.
-    
-    Excel anchors images to cells using either:
-    - twoCellAnchor: Image spans from one cell to another
-    - oneCellAnchor: Image is anchored to a single cell
-    
-    Both types have a <from> element specifying the top-left cell position.
-    
-    Args:
-        anchor: XML Element representing the anchor (twoCellAnchor or oneCellAnchor)
-        rels: Dictionary mapping rId to image paths (from get_drawing_rels)
-        zf: Open ZipFile object for the Excel file
-        images_dir: Directory path where extracted images should be saved
-        sheet_name: Name of the worksheet (used for unique filenames)
-        
-    Returns:
-        Dictionary with image info if successful:
-        {
-            'cell': 'B6',
-            'filename': '5.1.2a_B6_img001.png',
-            'markdown': '![5.1.2a_B6](images/5.1.2a_B6_img001.png)',
-            'description': '5.1.2a_B6'
-        }
-        Returns None if image extraction fails.
-    """
-    # Get anchor position (top-left cell)
-    from_elem = anchor.find('xdr:from', NAMESPACES)
-    if from_elem is None:
-        return None
-    
-    # Excel uses 0-indexed col/row in XML, convert to 1-indexed cell reference
-    col = int(from_elem.find('xdr:col', NAMESPACES).text)
-    row = int(from_elem.find('xdr:row', NAMESPACES).text)
-    cell_ref = f"{get_column_letter(col + 1)}{row + 1}"
-    
-    # Find the picture element within the anchor
-    pic = anchor.find('.//xdr:pic', NAMESPACES)
-    if pic is None:
-        return None
-    
-    # Get rId reference to find actual image file
-    # The blip element contains the embedded image reference
-    blip = pic.find('.//a:blip', NAMESPACES)
-    if blip is None:
-        return None
-    
-    rid = blip.get('{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed')
-    if rid not in rels:
-        return None
-    
-    # Get source image path in ZIP and extract it
-    source_path = rels[rid]
-    
-    # Create unique filename: {sheet}_{cell}_{original_image_name}
-    # e.g., "5.1.2a_B6_image2.png"
-    safe_sheet = re.sub(r'[^\w\-]', '_', sheet_name)
-    original_img_name = os.path.basename(source_path)  # e.g., "image2.png"
-    output_filename = f"{safe_sheet}_{cell_ref}_{original_img_name}"
-    output_path = os.path.join(images_dir, output_filename)
-    
-    # Extract image file from ZIP to output directory
-    if source_path in zf.namelist():
-        with open(output_path, 'wb') as f:
-            f.write(zf.read(source_path))
-    else:
-        return None
-    
-    # Use sheet_cell as description for clarity in markdown
-    description = f"{sheet_name}_{cell_ref}"
-    
-    return {
-        'cell': cell_ref,
-        'filename': output_filename,
-        'markdown': f"![{description}](images/{output_filename})",
-        'description': description
-    }
-
-
-def extract_images_from_drawing(
-    excel_path: str,
-    drawing_path: str,
-    output_dir: str,
-    sheet_name: str
-) -> List[Dict]:
-    """
-    Extract all images from a drawing XML file.
-    
-    Parses the drawing XML to find all image anchors (twoCellAnchor and
-    oneCellAnchor elements), extracts the referenced images, and saves
-    them to the output directory.
-    
-    Args:
-        excel_path: Path to the .xlsx file
-        drawing_path: Path to the drawing XML within the ZIP
-        output_dir: Base directory for output (images saved to output_dir/images/)
-        sheet_name: Name of the worksheet (used for unique filenames)
-        
-    Returns:
-        List of image info dictionaries (see process_anchor for structure)
-    """
-    images = []
-
-    if not drawing_path:
-        return images
-
-    # Parse rels and drawing XML in a single ZipFile open
-    drawing_filename = drawing_path.split('/')[-1]
-    rels_path = f"xl/drawings/_rels/{drawing_filename}.rels"
-
-    with ZipFile(excel_path, 'r') as zf:
-        # Build rId -> image path mapping (was a separate get_drawing_rels call)
-        rels = {}
-        if rels_path in zf.namelist():
-            rels_xml = zf.read(rels_path).decode('utf-8')
-            rels_root = ET.fromstring(rels_xml)
-            for rel in rels_root.findall('.//{http://schemas.openxmlformats.org/package/2006/relationships}Relationship'):
-                rid = rel.get('Id')
-                target = rel.get('Target')
-                if target.startswith('..'):
-                    target = 'xl' + target[2:]
-                rels[rid] = target
-
-        if not rels:
-            return images
-
-        if drawing_path not in zf.namelist():
-            return images
-
-        # Parse drawing XML
-        drawing_xml = zf.read(drawing_path).decode('utf-8')
-        root = ET.fromstring(drawing_xml)
-
-        # Create images output directory
-        images_dir = os.path.join(output_dir, 'images')
-        os.makedirs(images_dir, exist_ok=True)
-
-        # Process both anchor types
-        for anchor in root.findall('.//xdr:twoCellAnchor', NAMESPACES):
-            img_info = process_anchor(anchor, rels, zf, images_dir, sheet_name)
-            if img_info:
-                images.append(img_info)
-
-        for anchor in root.findall('.//xdr:oneCellAnchor', NAMESPACES):
-            img_info = process_anchor(anchor, rels, zf, images_dir, sheet_name)
-            if img_info:
-                images.append(img_info)
-
-    return images
-
-
-def extract_images(excel_path: str, sheet_name: str, output_dir: str) -> List[Dict]:
-    """
-    Extract all images from a specific worksheet.
-    
-    High-level function that combines sheet lookup and image extraction.
-    
-    Args:
-        excel_path: Path to the .xlsx file
-        sheet_name: Name of the worksheet
-        output_dir: Base directory for output
-        
-    Returns:
-        List of image info dictionaries
-    """
-    drawing_path = get_sheet_drawing_path(excel_path, sheet_name)
-    return extract_images_from_drawing(excel_path, drawing_path, output_dir, sheet_name)
 
 
 def extract_hyperlinks(excel_path: str, sheet_name: str) -> Dict[str, str]:
